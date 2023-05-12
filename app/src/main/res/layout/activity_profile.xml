@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp"
+    android:orientation="vertical"
+    tools:context=".ProfileActivity">
+
+    <LinearLayout
+        android:id="@+id/head_img_change_ll"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="头像"
+
+            android:textSize="24sp"
+            android:layout_gravity="center"
+            android:layout_weight="1"/>
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/head_img_profile"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:civ_border_color="#fc9"
+            app:civ_border_width="1px"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/entry"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/username_linearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="24sp"
+            android:text="用户名"
+            android:layout_gravity="center"
+            android:textColor="@color/black"
+            android:gravity="left"/>
+        <TextView
+            android:id="@+id/username_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="24sp"
+            android:text="13156512"
+            android:textColor="@color/black"
+            android:drawableRight="@drawable/entry"
+            android:gravity="right"/>
+
+    </LinearLayout>
+    <TextView
+        android:id="@+id/password_change_profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:text="修改密码"
+        android:textSize="24sp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="30dp"/>
+
+</LinearLayout>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".HomeActivity">
+
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="0dp"
+       android:layout_weight="9">
+
+       <androidx.drawerlayout.widget.DrawerLayout
+           android:id="@+id/drawerLayer"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent">
+           <FrameLayout
+               android:id="@+id/container_fragment"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               >
+               <com.google.android.material.floatingactionbutton.FloatingActionButton
+                   android:id="@+id/drawerBtn"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_marginStart="20dp"
+                   android:layout_marginTop="20dp"
+                   android:layout_gravity="start|top"
+                   android:backgroundTint="@color/white"
+                   app:backgroundTint="@color/white"
+                   android:src="@drawable/ic_baseline_menu"
+                   app:fabSize="mini"/>
+           </FrameLayout>
+           <com.google.android.material.navigation.NavigationView
+               android:id="@+id/navigationView"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:layout_gravity="start">
+
+               <LinearLayout
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:background="@drawable/radius_bg"
+                   android:layout_marginTop="50dp">
+                   <TextView
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content"
+                       android:text="ddddfdfdfd"/>
+               </LinearLayout>
+           </com.google.android.material.navigation.NavigationView>
+
+       </androidx.drawerlayout.widget.DrawerLayout>
+   </LinearLayout>
+
+<!--    底部按钮-->
+
+        <RadioGroup
+            android:id="@+id/fragmments_rg"
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+            <RadioButton
+                android:id="@+id/chinese_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/chineseHistory"
+                android:layout_weight="1"
+                android:background="@drawable/fragment_change_btn"
+                android:button="@null"
+                android:checked="true"
+                android:drawableTop="@drawable/drawable_top_chinese_btn"
+                android:textSize="18sp"/>
+            <RadioButton
+                android:id="@+id/world_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/worldHistory"
+                android:layout_weight="1"
+                android:background="@drawable/fragment_change_btn"
+                android:drawableTop="@drawable/drawable_top_world_btn"
+                android:button="@null"
+                android:textSize="18sp"/>
+            <RadioButton
+                android:id="@+id/commonsense_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/find"
+                android:layout_weight="1"
+                android:background="@drawable/fragment_change_btn"
+                android:drawableTop="@drawable/drawable_top_commonsense_pressed"
+                android:button="@null"
+                android:textSize="18sp"/>
+            <RadioButton
+                android:id="@+id/mine_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/mine"
+                android:layout_weight="1"
+                android:background="@drawable/fragment_change_btn"
+                android:drawableTop="@drawable/drawable_top_mine_pressed"
+                android:button="@null"
+                android:textSize="18sp"/>
+        </RadioGroup>
+
+</LinearLayout>

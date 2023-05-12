@@ -1,0 +1,56 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="fragment.ChineseHistoryFragment"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        >
+       <LinearLayout
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content">
+           <Button
+               android:id="@+id/book"
+               android:layout_width="150dp"
+               android:layout_height="100dp"
+               android:textColor="@color/black"
+               android:textSize="20dp"
+               android:text="相关书籍"/>
+
+           <Button
+               android:layout_width="150dp"
+               android:layout_height="100dp"
+               android:textColor="@color/black"
+               android:textSize="20dp"
+               android:layout_marginLeft="5dp"
+               android:text="神话故事"/>
+
+           <Button
+               android:layout_width="150dp"
+               android:layout_height="100dp"
+               android:textColor="@color/black"
+               android:textSize="20dp"
+               android:layout_marginLeft="5dp"
+               android:text="成语典故"/>
+       </LinearLayout>
+    </HorizontalScrollView>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="--中国历史朝代--"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="10dp"/>
+
+    <ListView
+        android:id="@+id/dynasty_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"/>
+
+</LinearLayout>
