@@ -59,7 +59,7 @@ public class MineFragment extends Fragment {
         db = new MySqliteOpenHelper(getActivity());
         initView(view);
         if(!TextUtils.isEmpty(db.getCurrentUser().getAvatar()))
-            Glide.with(getActivity()).load("http://139.155.248.158:18080/history/"+db.getCurrentUser().getAvatar()).into(imageView);
+            Glide.with(getActivity()).load("http://139.155.248.158:18080/history/uploads/"+db.getCurrentUser().getAvatar()).into(imageView);
 
         return view;
     }
@@ -115,6 +115,12 @@ public class MineFragment extends Fragment {
 
 
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        nickname.setText(db.getCurrentUser().getNickname());
     }
 
     private void initView(View view){

@@ -28,8 +28,8 @@
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
                    android:layout_marginStart="20dp"
-                   android:layout_marginTop="20dp"
-                   android:layout_gravity="start|top"
+                   android:layout_marginBottom="20dp"
+                   android:layout_gravity="start|bottom"
                    android:backgroundTint="@color/white"
                    app:backgroundTint="@color/white"
                    android:src="@drawable/ic_baseline_menu"
@@ -39,6 +39,7 @@
                android:id="@+id/navigationView"
                android:layout_width="match_parent"
                android:layout_height="match_parent"
+               android:background="#eee"
                android:layout_gravity="start">
 
                <LinearLayout
@@ -46,36 +47,61 @@
                    android:layout_height="match_parent"
                    android:background="@drawable/radius_bg"
                    android:padding="5dp"
+                   android:layout_marginLeft="10dp"
                    android:orientation="vertical"
                    android:layout_marginTop="50dp">
 
                    <LinearLayout
                        android:layout_width="match_parent"
-                       android:layout_height="match_parent"
+                       android:layout_height="wrap_content"
                        android:padding="5dp"
+                       android:id="@+id/profileBox"
                        android:orientation="horizontal">
 
                        <de.hdodenhof.circleimageview.CircleImageView
                            android:layout_width="80dp"
                            android:layout_height="80dp"
-                           android:id="@+id/img_drawer"/>
+                           android:id="@+id/img_drawer"
+                           android:background="#fc0"/>
                        <TextView
+                           android:layout_marginLeft="5dp"
+                           android:layout_marginTop="10dp"
+                           android:layout_marginBottom="10dp"
                            android:id="@+id/nickname_drawer"
                            android:layout_width="match_parent"
-                           android:layout_height="wrap_content"
+                           android:layout_height="match_parent"
+                           android:layout_gravity="center"
+                           android:gravity="center"
+                           android:textSize="18dp"
                            android:text="ddddfdfdfd"/>
                    </LinearLayout>
 
+                   <FrameLayout
+                       android:layout_width="match_parent"
+                       android:layout_height="0.5dp"
+                       android:background="#ccc"/>
                    <LinearLayout
                        android:layout_width="match_parent"
                        android:layout_height="wrap_content"
+                       android:layout_marginTop="5dp"
+                       android:paddingTop="10dp"
+                       android:paddingBottom="10dp"
                        android:padding="5dp">
                        <TextView
                            android:layout_width="match_parent"
                            android:layout_height="wrap_content"
-                           android:text="我的分享"/>
+                           android:text="我的分享"
+                           android:textSize="18dp"
+                           android:gravity="center"
+                           android:drawableRight="@drawable/entry"
+                           android:drawablePadding="5dp"/>
                    </LinearLayout>
 
+
+                   <FrameLayout
+                       android:layout_width="match_parent"
+                       android:layout_height="0.5dp"
+                       android:background="#ccc"/>
                </LinearLayout>
            </com.google.android.material.navigation.NavigationView>
 

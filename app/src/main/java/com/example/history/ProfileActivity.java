@@ -33,7 +33,10 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.history.bean.Account;
 import com.example.history.bean.MySqliteOpenHelper;
+import com.example.history.bean.Threads.ChangeNicknameThread;
+import com.example.history.bean.Threads.ChangePasswordThread;
 import com.example.history.bean.Threads.UploadTask;
+import com.example.history.bean.model.CurrentLogin;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -58,6 +61,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import utils.HttpUtil;
@@ -98,12 +102,11 @@ public class ProfileActivity extends AppCompatActivity {
             }
         }
 
-
+        bindEvent();
         //修改头像
         img_change.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
                 builder.setTitle("修改头像");
                 String[] items={"相册"};
@@ -113,9 +116,6 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which){
                             case 0://调用相册
-//                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//                                intent.setType("image/*");
-//                                startActivityForResult(intent, PICK_IMAGE_REQUEST);
                                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                 startActivityForResult(intent, PICK_IMAGE_REQUEST);
                                 break;
@@ -126,46 +126,6 @@ public class ProfileActivity extends AppCompatActivity {
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                }).show();
-            }
-        });
-
-        password_change.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder2 = new AlertDialog.Builder(ProfileActivity.this);
-                View view3 = LayoutInflater.from(ProfileActivity.this).inflate(R.layout.layout_dialog_password_change, null);
-
-                builder2.setView(view3).setPositiveButton("确认修改", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                    }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                }).setCancelable(false).show();
-            }
-        });
-
-        //更改昵称
-        username_change.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(ProfileActivity.this);
-                View view2 = LayoutInflater.from(ProfileActivity.this).inflate(R.layout.layout_dialog_username_change, null);
-
-                builder1.setView(view2).setPositiveButton("确认修改", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
 
                     }
                 }).show();
@@ -185,14 +145,16 @@ public class ProfileActivity extends AppCompatActivity {
             Log.d("TAG","imgpaht:"+imgPath);
             int lastIndex = imgPath.lastIndexOf("/");
             String fileName1 = imgPath.substring(lastIndex + 1);//获取图片名.后缀
-            db.setCurrentUser(db.getCurrentUser().getUsername(),db.getCurrentUser().getPassword(),db.getCurrentUser().getNickname(),db.getCurrentUser().getAvatar(),db.getCurrentUser().getUid());
+            CurrentLogin c = new CurrentLogin();
+            db.setCurrentUser(c.getUsername(),c.getPassword(),c.getNickname(),fileName1,c.getUid());
             new Thread(){
                 @Override
                 public void run() {
                     try {
+                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
 //                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
                         Log.d("TAG","imgpaht:"+imgPath);
-                        uploadImage("http://139.155.248.158:18080/history/TestUpload",imgPath);
+//                        uploadImage("http://139.155.248.158:18080/history/TestUpload",imgPath);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -201,19 +163,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
     }
-    private void initData(){
-        db = new MySqliteOpenHelper(ProfileActivity.this);
-    }
-    private void initView(){
-        img_change = findViewById(R.id.head_img_change_ll);
-        username_change = findViewById(R.id.username_linearlayout);
-        nickname_profile = findViewById(R.id.username_profile);
-        password_change = findViewById(R.id.password_change_profile);
-        imageView = findViewById(R.id.head_img_profile);//头像
 
-        String nickname = db.getCurrentUser().getNickname();
-        nickname_profile.setText(nickname);
-    }
 
     private void uploadImage(String url, String filePath) throws IOException {
         Log.e("------","上传图片filePath"+filePath);
@@ -263,6 +213,7 @@ public class ProfileActivity extends AppCompatActivity {
         sb.append("Content-Disposition: form-data; name=\"id\"\r\n\r\n");
         String id = db.getCurrentUser().getUid();
         sb.append(id + "\r\n");
+
 
 //        sb.append("\r\n");
 //        sb.append("--" + boundary + "\r\n");
@@ -331,5 +282,104 @@ public class ProfileActivity extends AppCompatActivity {
         return path;
     }
 
+
+//    private void testUpload(){
+//        MultipartBody.Builder builder = new MultipartBody.Builder();
+//        // 这里演示添加用户ID
+//        builder.addFormDataPart("userId", "20160519142605");
+//        builder.addFormDataPart("image", imgPath,
+//                RequestBody.create(MediaType.parse("image/jpeg"), new File(imgPath)));
+//
+//        RequestBody requestBody = builder.build();
+//        Request.Builder reqBuilder = new Request.Builder();
+//        Request request = reqBuilder
+//                .url(Constant.BASE_URL + "/uploadimage")
+//                .post(requestBody)
+//                .build();
+//    }
+private void initData(){
+    db = new MySqliteOpenHelper(ProfileActivity.this);
+}
+    private void initView(){
+        img_change = findViewById(R.id.head_img_change_ll);
+        username_change = findViewById(R.id.username_linearlayout);
+        nickname_profile = findViewById(R.id.username_profile);
+        password_change = findViewById(R.id.password_change_profile);
+        imageView = findViewById(R.id.head_img_profile);//头像
+
+        String nickname = db.getCurrentUser().getNickname();
+        nickname_profile.setText(nickname);
+    }
+    private void bindEvent(){
+        //修改密码
+        password_change.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder2 = new AlertDialog.Builder(ProfileActivity.this);
+                View view3 = LayoutInflater.from(ProfileActivity.this).inflate(R.layout.layout_dialog_password_change, null);
+                EditText originalPassword = view3.findViewById(R.id.password_original_dialog);
+                EditText newPassword = view3.findViewById(R.id.password_new_dialog);
+                EditText confirmPassword = view3.findViewById(R.id.password_confirm_dialog);
+
+
+                builder2.setView(view3).setPositiveButton("确认修改", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String originStr = originalPassword.getText().toString();
+                        String newpassword = newPassword.getText().toString().trim();
+                        String confirmpassword = confirmPassword.getText().toString().trim();
+                        if(!originStr.equals(db.getCurrentUser().getPassword())){
+                            ToastUtil.showMsg(ProfileActivity.this,"原密码错误");
+                            Log.e("TAG","原密码："+originStr+",数据库密码："+db.getCurrentUser().getPassword());
+                        }else if(!newpassword.equals(confirmpassword)){
+                            ToastUtil.showMsg(ProfileActivity.this,"两次密码不一致");
+                        }else if(TextUtils.isEmpty(newpassword)){
+                            ToastUtil.showMsg(ProfileActivity.this,"密码不能为空");
+                        }else if(originStr.equals(newpassword)){
+                            ToastUtil.showMsg(ProfileActivity.this,"新密码与旧密码相同");
+                        }
+                        else{
+                            new ChangePasswordThread(db.getCurrentUser().getUsername(),newpassword).start();
+                            CurrentLogin c = new CurrentLogin();
+                            ToastUtil.showMsg(ProfileActivity.this,"修改成功");
+//                            db.setCurrentUser(c.getUsername(),newpassword,c.getNickname(),c.getAvatar(),c.getUid());
+                        }
+
+                    }
+                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                }).setCancelable(false).show();
+            }
+        });
+
+        //更改昵称
+        username_change.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(ProfileActivity.this);
+                View view2 = LayoutInflater.from(ProfileActivity.this).inflate(R.layout.layout_dialog_username_change, null);
+                EditText nicknameChange = view2.findViewById(R.id.et_nickname_change);
+                builder1.setView(view2).setPositiveButton("确认修改", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String newNickname = nicknameChange.getText().toString();
+                        nickname_profile.setText(newNickname);
+                        ChangeNicknameThread thread = new ChangeNicknameThread(db.getCurrentUser().getUsername(),newNickname);
+                        thread.start();
+                        db.setCurrentUser(db.getCurrentUser().getUsername(),db.getCurrentUser().getPassword(),newNickname,db.getCurrentUser().getAvatar(),db.getCurrentUser().getUid());
+                        ToastUtil.showMsg(ProfileActivity.this,"修改成功");
+                    }
+                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                }).show();
+            }
+        });
+    }
 
 }

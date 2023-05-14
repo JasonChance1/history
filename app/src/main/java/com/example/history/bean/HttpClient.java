@@ -120,6 +120,24 @@ public class HttpClient {
         conn.disconnect();
     }
 
+    public static void changeNickname(String username,String nickname) throws IOException {
+        URL url = new URL("http://139.155.248.158:18080/history/ChangeNicknameServlet?username="+username+"&nickname="+nickname);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        conn.getInputStream();
+        conn.disconnect();
+    }
+
+    public static void changePassword(String username,String password) throws IOException {
+        URL url = new URL("http://139.155.248.158:18080/history/ChangePassword?username="+username+"&password="+password);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        conn.getInputStream();
+        conn.disconnect();
+    }
+
 
     //第一个参数为访问的url，第二个是请求类型，第三个是需要的参数，
     public static List<DynastyContent> queryContent(URL url, String type, String... strings) throws IOException, JSONException {

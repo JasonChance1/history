@@ -20,10 +20,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.history.bean.MySqliteOpenHelper;
+import com.example.history.bean.ProfileDrawerActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import fragment.ChineseHistoryFragment;
@@ -42,6 +46,10 @@ public class HomeActivity extends AppCompatActivity {
     private FloatingActionButton drawerBtn;
     private DrawerLayout drawerLayout;
     private String username;
+    private ImageView imgDrawer;
+    private TextView nicknameDrawer;
+    private MySqliteOpenHelper db;
+    private LinearLayout profileBox;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,19 +122,21 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        if (mineFragment != null) {
-//            mineFragment.onFragmentResume();
-//        }
+        nicknameDrawer = findViewById(R.id.nickname_drawer);
     }
 
     private void initAndSetClick(){
+        db = new MySqliteOpenHelper(HomeActivity.this);
         chinese=findViewById(R.id.chinese_fragment);
         world=findViewById(R.id.world_fragment);
         commonsense=findViewById(R.id.commonsense_fragment);
         mine=findViewById(R.id.mine_fragment);
         drawerBtn=findViewById(R.id.drawerBtn);
         drawerLayout=findViewById(R.id.drawerLayer);
-
+        imgDrawer = findViewById(R.id.img_drawer);
+        nicknameDrawer = findViewById(R.id.nickname_drawer);
+        profileBox = findViewById(R.id.profileBox);
+        nicknameDrawer.setText(db.getCurrentUser().getNickname());
         OnClick onClick=new OnClick();
 
         chinese.setOnClickListener(onClick);
@@ -185,6 +195,11 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 return true;
             }
+        });
+
+        profileBox.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, ProfileDrawerActivity.class);
+            startActivity(intent);
         });
     }
 }
