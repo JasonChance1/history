@@ -9,6 +9,7 @@
 
 
    <LinearLayout
+       android:layout_marginTop="20dp"
        android:layout_width="match_parent"
        android:layout_height="0dp"
        android:layout_weight="9">
@@ -44,11 +45,37 @@
                    android:layout_width="match_parent"
                    android:layout_height="match_parent"
                    android:background="@drawable/radius_bg"
+                   android:padding="5dp"
+                   android:orientation="vertical"
                    android:layout_marginTop="50dp">
-                   <TextView
+
+                   <LinearLayout
+                       android:layout_width="match_parent"
+                       android:layout_height="match_parent"
+                       android:padding="5dp"
+                       android:orientation="horizontal">
+
+                       <de.hdodenhof.circleimageview.CircleImageView
+                           android:layout_width="80dp"
+                           android:layout_height="80dp"
+                           android:id="@+id/img_drawer"/>
+                       <TextView
+                           android:id="@+id/nickname_drawer"
+                           android:layout_width="match_parent"
+                           android:layout_height="wrap_content"
+                           android:text="ddddfdfdfd"/>
+                   </LinearLayout>
+
+                   <LinearLayout
                        android:layout_width="match_parent"
                        android:layout_height="wrap_content"
-                       android:text="ddddfdfdfd"/>
+                       android:padding="5dp">
+                       <TextView
+                           android:layout_width="match_parent"
+                           android:layout_height="wrap_content"
+                           android:text="我的分享"/>
+                   </LinearLayout>
+
                </LinearLayout>
            </com.google.android.material.navigation.NavigationView>
 

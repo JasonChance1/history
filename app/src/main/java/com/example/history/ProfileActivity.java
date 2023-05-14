@@ -124,11 +124,11 @@ public class ProfileActivity extends AppCompatActivity {
                         dialog1.dismiss();
                     }
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-                            }
-                        }).show();
+                    }
+                }).show();
             }
         });
 
@@ -190,9 +190,9 @@ public class ProfileActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
-                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
+//                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
                         Log.d("TAG","imgpaht:"+imgPath);
-//                        uploadImage("http://139.155.248.158:18080/UpAndDown/UploadServlet",mImagePath);
+                        uploadImage("http://139.155.248.158:18080/history/TestUpload",imgPath);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -243,15 +243,32 @@ public class ProfileActivity extends AppCompatActivity {
         FileInputStream fis = new FileInputStream(new File(filePath));
         Log.e("------","读取文件fis");
         // 写入请求头
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("--" + boundary + "\r\n");
+//        sb.append("Content-Disposition: form-data; name=\"file\"; fileName=\"" + filePath + "\"\r\n");
+//        sb.append("Content-Type: application/octet-stream\r\n\r\n");
+////        sb.append("\r\n");
+//        sb.append("--" + boundary + "\r\n");
+//        sb.append("Content-Disposition: form-data; name=\"text\"; id=\"" + "\"\r\n\r\n");
+//        String uid = db.getCurrentUser().getUid();
+//        sb.append(uid+"\r\n");
+//        sb.append("--" + boundary + "--");
+//        String boundary = "*****";
         StringBuilder sb = new StringBuilder();
         sb.append("--" + boundary + "\r\n");
         sb.append("Content-Disposition: form-data; name=\"file\"; fileName=\"" + filePath + "\"\r\n");
         sb.append("Content-Type: application/octet-stream\r\n\r\n");
-        sb.append("\r\n");
+
         sb.append("--" + boundary + "\r\n");
-        sb.append("Content-Disposition: form-data; name=\"text\"\r\n\r\n");
-        sb.append("Your text goes here\r\n");
-        sb.append("--" + boundary + "--");
+        sb.append("Content-Disposition: form-data; name=\"id\"\r\n\r\n");
+        String id = db.getCurrentUser().getUid();
+        sb.append(id + "\r\n");
+
+//        sb.append("\r\n");
+//        sb.append("--" + boundary + "\r\n");
+//        sb.append("Content-Disposition: form-data; name=\"text\"\r\n\r\n");
+//        sb.append("Your text goes here\r\n");
+//        sb.append("--" + boundary + "--");
 
 // 发送请求并处理响应
 
