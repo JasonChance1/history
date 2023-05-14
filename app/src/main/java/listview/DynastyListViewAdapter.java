@@ -59,11 +59,6 @@ public class DynastyListViewAdapter extends BaseAdapter {
         holder.brief.setText(dc.getBrief());
 
         Glide.with(mcontext).load("139.155.248.158:18080/history/img/bannner03.jpg").into(holder.imageView);
-//        try {
-//            holder.imageView.setImageBitmap(BitmapFactory.decodeStream(new URL(dc.getImg()).openStream()));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         holder.title.setText(dc.getTitle());
         return view;
     }

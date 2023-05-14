@@ -27,13 +27,14 @@ public class MyCollectionsActivity extends AppCompatActivity {
     private ListView lv;
     private String username;
     private List<DynastyContent> list = new ArrayList<>();
+    private MySqliteOpenHelper db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_collections);
-
+        db = new MySqliteOpenHelper(MyCollectionsActivity.this);
         lv = findViewById(R.id.listview);
-        username = getIntent().getStringExtra("username");
+        username = db.getCurrentUser().getUsername();
         GetRecord getRecord = new GetRecord("0",username);
         FutureTask futureTask = new FutureTask(getRecord);
         Thread thread = new Thread(futureTask);

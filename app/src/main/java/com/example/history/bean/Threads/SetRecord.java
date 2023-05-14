@@ -22,7 +22,6 @@ public class SetRecord extends Thread{
             Log.d("SetRecord","插入成功");
         } catch (IOException e) {
             e.printStackTrace();
-
         }
     }
 }

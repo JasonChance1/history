@@ -28,7 +28,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:textSize="14sp"
-            android:text="555"
+            android:text="简介"
             android:textAlignment="center"
             android:paddingLeft="10dp"/>
     </LinearLayout>

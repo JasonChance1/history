@@ -1,10 +1,16 @@
 package com.example.history;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,6 +30,8 @@ import com.example.history.bean.Threads.NetWorkThread;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -36,17 +44,33 @@ import android.os.Build;
 public class LoginActivity extends AppCompatActivity {
     private Button loginBtn,registerBtn,resetpasswordBtn;
     private EditText username,password;
-    private MySqliteOpenHelper mySqliteOpenHelper;
     private CheckBox rememberPassword,autoLogin;
+    private MySqliteOpenHelper db;
+    private static final int PERMISSION_REQUEST_CODE = 100;
+    private static final int SETTINGS_REQUEST_CODE = 101;
+
+    private String[] permissions = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            // Add more permissions if needed
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        db = new MySqliteOpenHelper(LoginActivity.this);
         setContentView(R.layout.activity_login);
+        // 检查权限
+//        if (checkPermissions()) {
+//            // 所有权限已授予
+//            performStartupOperations();
+//        } else {
+//            // 请求权限
+//            requestPermissions();
+//        }
 
         //找到相应控件并设置相应的点击事件
         initViewAndSetOnClick();
-
-        mySqliteOpenHelper=new MySqliteOpenHelper(this);
 
         rememberPassword.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -113,15 +137,26 @@ public class LoginActivity extends AppCompatActivity {
         String data=map.get("data");
         Map<String,String> dataMap=JsonToObject.parseMap(JsonToObject.sub(data));
         String nickname=dataMap.get("nickname");
+        String avatar = dataMap.get("avatar");
+        String uid = dataMap.get("id");
 
+        System.out.printf("avatar-------"+avatar);
         if(TextUtils.equals(status,"100000")){
             ToastUtil.showMsg(LoginActivity.this,"登录成功");
+            if(TextUtils.isEmpty(db.getCurrentUser().getUsername())){
+                db.setCurrentUser(name,password1,nickname,avatar.substring(2),uid);
+            }else{
+                db.clearTable();
+                db.setCurrentUser(name,password1,nickname,avatar.substring(2),uid);
+            }
+
             if(rememberPassword.isChecked()){
                 SharedPreferences sharedPreferences=getSharedPreferences("spfPassword",MODE_PRIVATE);
                 SharedPreferences.Editor editor=sharedPreferences.edit();
                 editor.putString("username",name);
                 editor.putString("password",password1);
                 editor.putBoolean("isRemember",true);
+                Log.e("MainActivity","nickname"+nickname);
                 if(autoLogin.isChecked()){
                     editor.putBoolean("isAutoLogin",true);
                 }else{
@@ -135,12 +170,6 @@ public class LoginActivity extends AppCompatActivity {
                 editor.apply();
             }
             Intent intent=new Intent(LoginActivity.this,HomeActivity.class);
-            Bundle bundle=new Bundle();
-            Log.d("MineFragment","传过去的nickname:"+nickname);
-            bundle.putString("nickname",nickname);
-            bundle.putString("username",username.getText().toString());
-            bundle.putString("transition","fade");
-            intent.putExtras(bundle);
             startActivity(intent);
 
 //            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(LoginActivity.this).toBundle());
@@ -199,15 +228,88 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//            if (!Environment.isExternalStorageManager()){
-//                Uri uri = Uri.parse("package:" + getPackageName());
-//                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
-//                startActivity(intent);
+//    private boolean checkPermissions() {
+//        // 检查每个权限是否已授予
+//        for (String permission : permissions) {
+//            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+//                return false;
 //            }
 //        }
-
-
-
-
+//        return true;
+//    }
+//
+//    private void requestPermissions() {
+//        // 构建待请求的权限列表
+//        List<String> pendingPermissions = new ArrayList<>();
+//        for (String permission : permissions) {
+//            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+//                pendingPermissions.add(permission);
+//            }
+//        }
+//
+//        // 发起权限请求
+//        ActivityCompat.requestPermissions(this, pendingPermissions.toArray(new String[0]), PERMISSION_REQUEST_CODE);
+//    }
+//
+//    private void performStartupOperations() {
+//        // 在这里执行应用程序的启动操作
+//        // ...
+//
+//        // 进入应用程序的主界面
+//        startActivity(new Intent(this, HomeActivity.class));
+//        finish();
+//    }
+//
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if (requestCode == PERMISSION_REQUEST_CODE) {
+//            boolean allPermissionsGranted = true;
+//
+//            // 检查授权结果
+//            for (int grantResult : grantResults) {
+//                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+//                    allPermissionsGranted = false;
+//                    break;
+//                }
+//            }
+//
+//            if (allPermissionsGranted) {
+//                // 所有权限已授予
+//                performStartupOperations();
+//            } else {
+//                // 某些权限未被授予
+//                showPermissionDeniedMessage();
+//            }
+//        }
+//    }
+//
+//    private void showPermissionDeniedMessage() {
+//        // 显示权限被拒绝的提示
+//        // ...
+//
+//        // 打开应用程序设置页面，以便用户手动授予权限
+//        openAppSettings();
+//    }
+//
+//    private void openAppSettings() {
+//        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//        intent.setData(Uri.parse("package:" + getPackageName()));
+//        startActivityForResult(intent, SETTINGS_REQUEST_CODE);
+//    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (requestCode == SETTINGS_REQUEST_CODE) {
+//            // 检查权限
+//            if (checkPermissions()) {
+//                // 用户已在设置页面授予了所有权限
+//                performStartupOperations();
+//            } else {
+//                // 用户仍然未授予所有权限
+//                showPermissionDeniedMessage();
+//            }
+//        }
+//    }
 }

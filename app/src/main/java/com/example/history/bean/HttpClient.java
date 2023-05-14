@@ -75,6 +75,8 @@ public class HttpClient {
         conn.disconnect();
         return content.toString();
     }
+
+
     public static List<DynastyContent> getDynastyContent(String option) throws Exception{
         URL url = new URL("http://139.155.248.158:18080/history/DynastyContentListServlet?option="+option);
         return queryContent(url,"GET",option);

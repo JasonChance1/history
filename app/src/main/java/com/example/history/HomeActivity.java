@@ -8,9 +8,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.transition.Slide;
 import android.util.DisplayMetrics;
+
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,10 +31,12 @@ import fragment.CommonSenseFragment;
 import fragment.MineFragment;
 import fragment.WorldHistoryFragment;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 public class HomeActivity extends AppCompatActivity {
     private ChineseHistoryFragment chineseHistoryFragment;
     private CommonSenseFragment commonSenseFragment;
-//    private MineFragment mineFragment;
+    private MineFragment mineFragment;
     private WorldHistoryFragment worldHistoryFragment;
     private RadioButton chinese,world,commonsense,mine;
     private FloatingActionButton drawerBtn;
@@ -75,15 +82,9 @@ public class HomeActivity extends AppCompatActivity {
         public void onClick(View v) {
             switch (v.getId()){
                 case R.id.chinese_fragment:
-                    Log.d("HomeActivity","Activity接收到的username:"+username);
-                    Bundle bundle2=new Bundle();
-                    bundle2.putString("username1",username);
-                    chineseHistoryFragment.setArguments(bundle2);
 
-                    FragmentManager fragmentManager=getSupportFragmentManager();
-                    FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
-
-                    fragmentTransaction.replace(R.id.container_fragment,chineseHistoryFragment).commitAllowingStateLoss();
+                    if(chineseHistoryFragment==null) chineseHistoryFragment=new ChineseHistoryFragment();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container_fragment,chineseHistoryFragment).commitAllowingStateLoss();
                     break;
 
                 case R.id.world_fragment:
@@ -95,19 +96,8 @@ public class HomeActivity extends AppCompatActivity {
                     getSupportFragmentManager().beginTransaction().replace(R.id.container_fragment,commonSenseFragment).commitAllowingStateLoss();
                     break;
                 case R.id.mine_fragment:
-                    //通过Argument传递数据到Fragment
-                    FragmentManager fragmentManager1=getSupportFragmentManager();
-                    FragmentTransaction fragmentTransaction1=fragmentManager1.beginTransaction();
-                    MineFragment mineFragment=new MineFragment();
-                    //从LoginActivity获取登录的账号
-                    Intent intent1=getIntent();
-                    Bundle bundle1=intent1.getExtras();
-                    String nickname=bundle1.getString("nickname");//从Login传入
-                    Bundle bundle3=new Bundle();
-                    bundle3.putString("nickname1",nickname);
-                    bundle3.putString("username",username);
-                    mineFragment.setArguments(bundle3);
-                    fragmentTransaction1.replace(R.id.container_fragment,mineFragment).commitAllowingStateLoss();
+                    if(mineFragment==null) mineFragment=new MineFragment();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container_fragment,mineFragment).commitAllowingStateLoss();
                     break;
                 case R.id.drawerBtn:
                     drawerLayout.open();
@@ -119,6 +109,14 @@ public class HomeActivity extends AppCompatActivity {
                     break;
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        if (mineFragment != null) {
+//            mineFragment.onFragmentResume();
+//        }
     }
 
     private void initAndSetClick(){

@@ -8,14 +8,18 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,10 +30,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.history.bean.Account;
 import com.example.history.bean.MySqliteOpenHelper;
 import com.example.history.bean.Threads.UploadTask;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -37,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -64,24 +71,33 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView nickname_profile;
     private TextView password_change;
     private ImageView imageView;
-
-    private String username, password, nickname, imagePath;
+    private MySqliteOpenHelper db;
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+    public static String path = Environment.getExternalStorageDirectory().getPath();//获取系统根目录
+    public static String rootPath = path + "/历史通/";
+    private String imgPath="1679298523686.jpg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        initData();
+        initView();
 
-        img_change = findViewById(R.id.head_img_change_ll);
-        username_change = findViewById(R.id.username_linearlayout);
-        nickname_profile = findViewById(R.id.username_profile);
-        password_change = findViewById(R.id.password_change_profile);
-        imageView = findViewById(R.id.head_img_profile);//头像
+        verifyStoragePermissions(ProfileActivity.this);
 
-        //获取用户名，通过用户名找到
-        Intent intent = getIntent();
-        nickname = intent.getExtras().getString("nickname");
-        nickname_profile.setText(nickname);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            if (!Environment.isExternalStorageManager()){
+                Uri uri = Uri.parse("package:" + getPackageName());
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                startActivity(intent);
+            }
+        }
+
 
         //修改头像
         img_change.setOnClickListener(new View.OnClickListener() {
@@ -97,8 +113,10 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which){
                             case 0://调用相册
-                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                                intent.setType("image/*");
+//                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//                                intent.setType("image/*");
+//                                startActivityForResult(intent, PICK_IMAGE_REQUEST);
+                                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                 startActivityForResult(intent, PICK_IMAGE_REQUEST);
                                 break;
                         }
@@ -119,9 +137,6 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 AlertDialog.Builder builder2 = new AlertDialog.Builder(ProfileActivity.this);
                 View view3 = LayoutInflater.from(ProfileActivity.this).inflate(R.layout.layout_dialog_password_change, null);
-                EditText original_password = view3.findViewById(R.id.password_original_dialog);
-                EditText new_password = view3.findViewById(R.id.password_new_dialog);
-                EditText confirm_password = view3.findViewById(R.id.password_confirm_dialog);
 
                 builder2.setView(view3).setPositiveButton("确认修改", new DialogInterface.OnClickListener() {
                     @Override
@@ -142,14 +157,11 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 AlertDialog.Builder builder1 = new AlertDialog.Builder(ProfileActivity.this);
                 View view2 = LayoutInflater.from(ProfileActivity.this).inflate(R.layout.layout_dialog_username_change, null);
-                EditText new_username = view2.findViewById(R.id.et_username_change);//输入框中的用户名
+
                 builder1.setView(view2).setPositiveButton("确认修改", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Account account = new Account();
-                        account.setNickname(new_username.getText().toString());
-                        account.setUsername(username);
-                        account.setPassword(password);
+
                     }
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
@@ -160,22 +172,147 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        if (imagePath != null) {
-            Uri uri = Uri.parse(imagePath);
-            imageView.setImageURI(uri); //将ImageView的图像设置为该Uri指向的图像
-        } else { //否则，使用默认背景图像
-            imageView.setImageResource(R.drawable.default_avatar);
-        }
     }
+
 
     //从相册或相机返回
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-
+            Uri uri = data.getData();
+            imgPath = getRealPathFromUri(uri);
+            Log.d("TAG","imgpaht:"+imgPath);
+            int lastIndex = imgPath.lastIndexOf("/");
+            String fileName1 = imgPath.substring(lastIndex + 1);//获取图片名.后缀
+            db.setCurrentUser(db.getCurrentUser().getUsername(),db.getCurrentUser().getPassword(),db.getCurrentUser().getNickname(),db.getCurrentUser().getAvatar(),db.getCurrentUser().getUid());
+            new Thread(){
+                @Override
+                public void run() {
+                    try {
+                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
+                        Log.d("TAG","imgpaht:"+imgPath);
+//                        uploadImage("http://139.155.248.158:18080/UpAndDown/UploadServlet",mImagePath);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
         }
 
     }
+    private void initData(){
+        db = new MySqliteOpenHelper(ProfileActivity.this);
+    }
+    private void initView(){
+        img_change = findViewById(R.id.head_img_change_ll);
+        username_change = findViewById(R.id.username_linearlayout);
+        nickname_profile = findViewById(R.id.username_profile);
+        password_change = findViewById(R.id.password_change_profile);
+        imageView = findViewById(R.id.head_img_profile);//头像
+
+        String nickname = db.getCurrentUser().getNickname();
+        nickname_profile.setText(nickname);
+    }
+
+    private void uploadImage(String url, String filePath) throws IOException {
+        Log.e("------","上传图片filePath"+filePath);
+        // 创建URL对象
+        URL urlObj = new URL(url);
+        // 打开连接
+        HttpURLConnection conn = (HttpURLConnection)urlObj.openConnection();
+        // 设置请求方法
+        conn.setRequestMethod("POST");
+        // 允许输入输出流
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        Log.e("------","允许输入流");
+        String boundary = "****";
+        // 设置请求头
+        conn.setRequestProperty("Connection", "Keep-Alive");
+        conn.setRequestProperty("Charset", "UTF-8");
+        conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+        Log.e("------","设置请求头");
+        // 获取输出流
+        OutputStream out = conn.getOutputStream();
+        Log.e("------","获取输出流");
+        // 缓存区大小
+        byte[] buffer = new byte[4096];
+        int len = 0;
+        // 读取文件
+        FileInputStream fis = new FileInputStream(new File(filePath));
+        Log.e("------","读取文件fis");
+        // 写入请求头
+        StringBuilder sb = new StringBuilder();
+        sb.append("--" + boundary + "\r\n");
+        sb.append("Content-Disposition: form-data; name=\"file\"; fileName=\"" + filePath + "\"\r\n");
+        sb.append("Content-Type: application/octet-stream\r\n\r\n");
+        sb.append("\r\n");
+        sb.append("--" + boundary + "\r\n");
+        sb.append("Content-Disposition: form-data; name=\"text\"\r\n\r\n");
+        sb.append("Your text goes here\r\n");
+        sb.append("--" + boundary + "--");
+
+// 发送请求并处理响应
+
+
+        out.write(sb.toString().getBytes());
+        Log.e("------","写入请求头"+sb);
+        // 写入文件数据
+        while ((len = fis.read(buffer)) != -1) {
+            out.write(buffer, 0, len);
+        }
+        Log.e("------","上传图片"+out);
+        // 写入请求尾
+        String endStr = "\r\n--" + boundary + "--\r\n";
+        out.write(endStr.getBytes());
+        Log.e("------","写入请求尾"+endStr);
+        // 关闭流
+        fis.close();
+        out.flush();
+        out.close();
+        // 获取服务器返回结果
+        InputStream in = conn.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        String result = "";
+        String line = "";
+        while ((line = reader.readLine()) != null) {
+            result += line;
+        }
+        Log.e("------","返回结果"+result);
+        // 关闭流
+        in.close();
+    }
+
+    public void verifyStoragePermissions(Activity activity) {
+        // 检查是否已经授权
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // 如果未授权，则弹出权限请求对话框
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
+
+    private String getRealPathFromUri(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+
+        if (cursor == null) {
+            return null;
+        }
+
+        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String path = cursor.getString(columnIndex);
+        cursor.close();
+        return path;
+    }
+
 
 }

@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.example.history.bean.DynastyContent;
+import com.example.history.bean.MySqliteOpenHelper;
 import com.example.history.bean.Threads.ClearHistory;
 import com.example.history.bean.Threads.GetRecord;
 
@@ -26,13 +27,15 @@ public class HistoryActivity extends AppCompatActivity {
     private ListView listView;
     private Button clear;
     private List<DynastyContent> dc = new ArrayList<>();
+    private MySqliteOpenHelper db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
+        db = new MySqliteOpenHelper(HistoryActivity.this);
         Log.d("HistoryBrowse","HistoryActivity");
-        String username = getIntent().getStringExtra("username");
+        String username = db.getCurrentUser().getUsername();
         listView = findViewById(R.id.listview);
         GetRecord getRecord = new GetRecord("1",username);
         FutureTask futureTask = new FutureTask(getRecord);

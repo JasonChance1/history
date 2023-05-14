@@ -23,6 +23,7 @@ import com.example.history.BookActivity;
 import com.example.history.DetailChineseHistoryActivity;
 import com.example.history.R;
 import com.example.history.bean.DynastyContent;
+import com.example.history.bean.MySqliteOpenHelper;
 import com.example.history.bean.Threads.GetDCCallable;
 import com.example.history.bean.Threads.SetRecord;
 //import com.mysql.fabric.xmlrpc.base.Data;
@@ -36,20 +37,16 @@ import utils.ToastUtil;
 
 public class ChineseHistoryFragment extends Fragment {
     private ListView dynasty_listview;
-    private String username="";
+    private MySqliteOpenHelper db;
+    private String username;
     private Button book;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_chinese_history,container,false);
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            username = bundle.getString("username1");
-            Log.d("HomeActivity","Fragment接收到的username:"+username);
-        } else {
-            Log.e("HomeActivity", "未找到 Bundle 对象");
-        }
         book = view.findViewById(R.id.book);
+        db = new MySqliteOpenHelper(getActivity());
+        username = db.getCurrentUser().getUsername();
         return view;
     }
 
