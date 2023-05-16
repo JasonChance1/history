@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.history"
-        minSdk 21
+        minSdk 23
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -53,6 +53,9 @@ dependencies {
 
     //okhttp
     implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+
+    // https://github.com/li-xiaojun/XPopup
+    implementation 'com.github.li-xiaojun:XPopup:2.9.4'
 
 
 

@@ -2,6 +2,7 @@ package listview;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +59,8 @@ public class DynastyListViewAdapter extends BaseAdapter {
         DynastyContent dc=mDynastyList.get(i);
         holder.brief.setText(dc.getBrief());
 
-        Glide.with(mcontext).load("139.155.248.158:18080/history/img/bannner03.jpg").into(holder.imageView);
+        Glide.with(mcontext).load("139.155.248.158:18080/history"+dc.getImg().substring(1)).into(holder.imageView);
+        Log.e("TAG","----"+dc.getImg().substring(1));
         holder.title.setText(dc.getTitle());
         return view;
     }

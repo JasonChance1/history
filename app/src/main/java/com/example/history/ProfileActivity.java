@@ -145,7 +145,7 @@ public class ProfileActivity extends AppCompatActivity {
             Log.d("TAG","imgpaht:"+imgPath);
             int lastIndex = imgPath.lastIndexOf("/");
             String fileName1 = imgPath.substring(lastIndex + 1);//获取图片名.后缀
-            CurrentLogin c = new CurrentLogin();
+            CurrentLogin c = db.getCurrentUser();
             db.setCurrentUser(c.getUsername(),c.getPassword(),c.getNickname(),fileName1,c.getUid());
             new Thread(){
                 @Override
@@ -153,7 +153,7 @@ public class ProfileActivity extends AppCompatActivity {
                     try {
                         uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
 //                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
-                        Log.d("TAG","imgpaht:"+imgPath);
+//                        Log.d("TAG","imgpaht:"+imgPath);
 //                        uploadImage("http://139.155.248.158:18080/history/TestUpload",imgPath);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -192,18 +192,7 @@ public class ProfileActivity extends AppCompatActivity {
         // 读取文件
         FileInputStream fis = new FileInputStream(new File(filePath));
         Log.e("------","读取文件fis");
-        // 写入请求头
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("--" + boundary + "\r\n");
-//        sb.append("Content-Disposition: form-data; name=\"file\"; fileName=\"" + filePath + "\"\r\n");
-//        sb.append("Content-Type: application/octet-stream\r\n\r\n");
-////        sb.append("\r\n");
-//        sb.append("--" + boundary + "\r\n");
-//        sb.append("Content-Disposition: form-data; name=\"text\"; id=\"" + "\"\r\n\r\n");
-//        String uid = db.getCurrentUser().getUid();
-//        sb.append(uid+"\r\n");
-//        sb.append("--" + boundary + "--");
-//        String boundary = "*****";
+
         StringBuilder sb = new StringBuilder();
         sb.append("--" + boundary + "\r\n");
         sb.append("Content-Disposition: form-data; name=\"file\"; fileName=\"" + filePath + "\"\r\n");
@@ -212,20 +201,13 @@ public class ProfileActivity extends AppCompatActivity {
         sb.append("--" + boundary + "\r\n");
         sb.append("Content-Disposition: form-data; name=\"id\"\r\n\r\n");
         String id = db.getCurrentUser().getUid();
-        sb.append(id + "\r\n");
-
-
-//        sb.append("\r\n");
-//        sb.append("--" + boundary + "\r\n");
-//        sb.append("Content-Disposition: form-data; name=\"text\"\r\n\r\n");
-//        sb.append("Your text goes here\r\n");
-//        sb.append("--" + boundary + "--");
-
-// 发送请求并处理响应
+        CurrentLogin c = db.getCurrentUser();
+        Log.e("ProfileActivity:","username"+c.getUsername()+",nickname"+c.getNickname()+",id:"+c.getUid());
+        sb.append(1 + "\r\n");
 
 
         out.write(sb.toString().getBytes());
-        Log.e("------","写入请求头"+sb);
+        Log.e("------","写入请求头,id:"+db.getCurrentUser().getUid()+","+sb);
         // 写入文件数据
         while ((len = fis.read(buffer)) != -1) {
             out.write(buffer, 0, len);
@@ -282,21 +264,6 @@ public class ProfileActivity extends AppCompatActivity {
         return path;
     }
 
-
-//    private void testUpload(){
-//        MultipartBody.Builder builder = new MultipartBody.Builder();
-//        // 这里演示添加用户ID
-//        builder.addFormDataPart("userId", "20160519142605");
-//        builder.addFormDataPart("image", imgPath,
-//                RequestBody.create(MediaType.parse("image/jpeg"), new File(imgPath)));
-//
-//        RequestBody requestBody = builder.build();
-//        Request.Builder reqBuilder = new Request.Builder();
-//        Request request = reqBuilder
-//                .url(Constant.BASE_URL + "/uploadimage")
-//                .post(requestBody)
-//                .build();
-//    }
 private void initData(){
     db = new MySqliteOpenHelper(ProfileActivity.this);
 }
@@ -340,7 +307,7 @@ private void initData(){
                         }
                         else{
                             new ChangePasswordThread(db.getCurrentUser().getUsername(),newpassword).start();
-                            CurrentLogin c = new CurrentLogin();
+                            CurrentLogin c = db.getCurrentUser();
                             ToastUtil.showMsg(ProfileActivity.this,"修改成功");
 //                            db.setCurrentUser(c.getUsername(),newpassword,c.getNickname(),c.getAvatar(),c.getUid());
                         }

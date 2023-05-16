@@ -26,7 +26,7 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".ProfileDrawerActivity"
+            android:name=".bean.ProfileDrawerActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
@@ -55,13 +55,6 @@
         </activity>
         <activity
             android:name=".DetailChineseHistoryActivity"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".TestActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

@@ -6,8 +6,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.example.history.bean.model.CurrentLogin;
+import com.example.history.bean.model.LocalInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.List;
 public class MySqliteOpenHelper extends SQLiteOpenHelper {
     public static final String DB_NAME="MySql.db";
     public static final String TABLE_NAME_CURRENT_LOGIN="current_login";
+    public static final String TABLE_USER_LOCAL = "localInfo";
 
 
 
@@ -24,6 +27,7 @@ public class MySqliteOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("create table "+TABLE_NAME_CURRENT_LOGIN+" (username text,password text, nickname text,avatar text,id text)");
+        sqLiteDatabase.execSQL("create table "+ TABLE_USER_LOCAL + "(username text primary key, imgcover text)");
     }
 
     @Override
@@ -32,6 +36,7 @@ public class MySqliteOpenHelper extends SQLiteOpenHelper {
             return;
         }
         db.execSQL("drop table if exists "+TABLE_NAME_CURRENT_LOGIN);
+        db.execSQL("drop table if exists "+TABLE_USER_LOCAL);
         onCreate(db);
     }
 
@@ -64,7 +69,6 @@ public class MySqliteOpenHelper extends SQLiteOpenHelper {
         cv.put("id",id);
         return db.insert(TABLE_NAME_CURRENT_LOGIN,null,cv);
 
-
     }
 
     public CurrentLogin getCurrentUser(){
@@ -83,6 +87,7 @@ public class MySqliteOpenHelper extends SQLiteOpenHelper {
                 currentLogin.setUsername(username);
                 currentLogin.setAvatar(avatar);
                 currentLogin.setUid(id);
+                Log.e("lOGIN123","-----------USERNAME,"+username+",PASSWORD:"+password+"id"+id+"AVATAR:"+avatar);
             }
         }
         return currentLogin;
@@ -91,6 +96,31 @@ public class MySqliteOpenHelper extends SQLiteOpenHelper {
     public void clearTable(){
         SQLiteDatabase db = getWritableDatabase();
         db.delete(TABLE_NAME_CURRENT_LOGIN,null,null);
+    }
+
+    public void insertLocalInfo(LocalInfo localInfo){
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+        cv.put("username",localInfo.getUsername());
+        cv.put("imgcover",localInfo.getImgcover());
+
+        db.insert(TABLE_USER_LOCAL,null,cv);
+    }
+
+    @SuppressLint("Range")
+    public LocalInfo getLocalInfoByUsername(String username){
+        SQLiteDatabase db = getWritableDatabase();
+        LocalInfo localInfo = new LocalInfo();
+        Cursor cursor =db.query(TABLE_USER_LOCAL,null,"username = ?",new String[]{username},null,null,null,null);
+        cursor.moveToNext();
+        if(cursor!=null){
+            while(cursor.moveToNext()){
+                localInfo.setUsername(cursor.getString(cursor.getColumnIndex("username")));
+                localInfo.setImgcover(cursor.getString(cursor.getColumnIndex("imgcover")));
+            }
+        }
+        return localInfo;
     }
 
 }

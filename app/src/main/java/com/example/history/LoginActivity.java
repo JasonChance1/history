@@ -26,6 +26,7 @@ import android.widget.EditText;
 
 import com.example.history.bean.MySqliteOpenHelper;
 import com.example.history.bean.Threads.NetWorkThread;
+import com.example.history.bean.model.CurrentLogin;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -142,8 +143,9 @@ public class LoginActivity extends AppCompatActivity {
 
         System.out.printf("avatar-------"+avatar);
         if(TextUtils.equals(status,"100000")){
+            CurrentLogin c = db.getCurrentUser();
             ToastUtil.showMsg(LoginActivity.this,"登录成功");
-            if(TextUtils.isEmpty(db.getCurrentUser().getUsername())){
+            if(TextUtils.isEmpty(c.getUsername())&&TextUtils.isEmpty(c.getAvatar())&&TextUtils.isEmpty(c.getPassword())&&TextUtils.isEmpty(c.getNickname())&&TextUtils.isEmpty(c.getUid())){
                 db.setCurrentUser(name,password1,nickname,avatar.substring(2),uid);
             }else{
                 db.clearTable();
