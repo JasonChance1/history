@@ -98,30 +98,36 @@ public class MySqliteOpenHelper extends SQLiteOpenHelper {
         db.delete(TABLE_NAME_CURRENT_LOGIN,null,null);
     }
 
-    public void insertLocalInfo(LocalInfo localInfo){
+    public void saveOrUpdate(LocalInfo localInfo) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues cv = new ContentValues();
-        cv.put("username",localInfo.getUsername());
-        cv.put("imgcover",localInfo.getImgcover());
+        cv.put("username", localInfo.getUsername());
+        cv.put("imgcover", localInfo.getImgcover());
 
-        db.insert(TABLE_USER_LOCAL,null,cv);
+        String[] whereArgs = {localInfo.getUsername()};
+
+        int rowsAffected = db.update(TABLE_USER_LOCAL, cv, "username = ?", whereArgs);
+        if (rowsAffected == 0) {
+            db.insert(TABLE_USER_LOCAL, null, cv);
+        }
     }
+
+
 
     @SuppressLint("Range")
-    public LocalInfo getLocalInfoByUsername(String username){
+    public LocalInfo getLocalInfoByUsername(String username) {
         SQLiteDatabase db = getWritableDatabase();
         LocalInfo localInfo = new LocalInfo();
-        Cursor cursor =db.query(TABLE_USER_LOCAL,null,"username = ?",new String[]{username},null,null,null,null);
-        cursor.moveToNext();
-        if(cursor!=null){
-            while(cursor.moveToNext()){
-                localInfo.setUsername(cursor.getString(cursor.getColumnIndex("username")));
-                localInfo.setImgcover(cursor.getString(cursor.getColumnIndex("imgcover")));
-            }
+        Cursor cursor = db.query(TABLE_USER_LOCAL, null, "username = ?", new String[]{username}, null, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            localInfo.setUsername(cursor.getString(cursor.getColumnIndex("username")));
+            localInfo.setImgcover(cursor.getString(cursor.getColumnIndex("imgcover")));
         }
+        cursor.close();
         return localInfo;
     }
+
 
 }
 

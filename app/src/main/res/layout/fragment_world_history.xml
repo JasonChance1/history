@@ -1,16 +1,35 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="fragment.WorldHistoryFragment">
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="10dp">
+        <TextView
+            android:id="@+id/screenBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="筛选"
+            android:textSize="18dp"
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:layout_marginRight="10dp"
+            android:gravity="right"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/screenBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:padding="10dp"
+        android:visibility="gone"
         android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        >
+        android:layout_marginTop="10dp">
         <Spinner
             android:id="@+id/continent"
             android:layout_width="0dp"
@@ -22,11 +41,10 @@
             android:layout_height="30dp"
             android:layout_weight="1"/>
     </LinearLayout>
-
     <ListView
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/listview"/>
 
-</FrameLayout>
+</LinearLayout>

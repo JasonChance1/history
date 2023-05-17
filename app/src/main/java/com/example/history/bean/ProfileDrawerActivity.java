@@ -1,70 +1,46 @@
 package com.example.history.bean;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 
 import com.example.history.R;
 import com.example.history.bean.model.CurrentLogin;
 import com.example.history.bean.model.LocalInfo;
-import com.lxj.xpopup.XPopup;
-import com.lxj.xpopup.interfaces.OnSelectListener;
-import com.lxj.xpopup.util.SmartGlideImageLoader;
 
-import utils.ToastUtil;
-import utils.Utils;
+import java.io.File;
 
 public class ProfileDrawerActivity extends AppCompatActivity {
     private ImageView imgCover;
     private final int PICK_IMAGE_REQUEST = 1;
 
     private MySqliteOpenHelper db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_drawer);
 
-        initView();
-        bindEvent();
-    }
-
-    private void initView(){
         db = new MySqliteOpenHelper(ProfileDrawerActivity.this);
+
         imgCover = findViewById(R.id.img_cover);
+        String username = db.getCurrentUser().getUsername();
+        String url = db.getLocalInfoByUsername(username).getImgcover();
+        if (TextUtils.isEmpty(url)) {
+            imgCover.setImageResource(R.drawable.cover_default);
+        } else {
+            imgCover.setImageURI(Uri.fromFile(new File(url)));
 
-        LocalInfo localInfo = db.getLocalInfoByUsername(db.getCurrentUser().getUsername());
-        if(!TextUtils.isEmpty(localInfo.getImgcover())){
-            Uri uri = Uri.parse(localInfo.getImgcover());
-            imgCover.setImageURI(uri);
         }
-    }
 
-    private void bindEvent(){
-        imgCover.setOnClickListener(v -> {
-            new XPopup.Builder(ProfileDrawerActivity.this)
-                    .asBottomList("", new String[]{"查看图片", "修改封面"},
-                            new OnSelectListener() {
-                                @Override
-                                public void onSelect(int position, String text) {
-                                    if(position==0){
-                                        new XPopup.Builder(ProfileDrawerActivity.this)
-                                                .asImageViewer(imgCover, db.getLocalInfoByUsername(db.getCurrentUser().getUsername()).getImgcover(), new SmartGlideImageLoader())
-                                                .show();
-
-                                    }
-                                    if(position==1){
-                                        openGallery();
-                                    }
-                                }
-                            })
-                    .show();
-        });
+        imgCover.setOnClickListener(v -> openGallery());
     }
 
     private void openGallery() {
@@ -77,20 +53,69 @@ public class ProfileDrawerActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+//            Uri imageUri = data.getData();
+//            String imagePath = getRealPathFromURI(imageUri);
+//
+//            // 将数据库中保存的图片URL更新为真实路径
+//            CurrentLogin c = db.getCurrentUser();
+//            LocalInfo localInfo = new LocalInfo(c.getUsername(), imagePath);
+//            db.saveOrUpdate(localInfo);
+//
+//            // 加载图片
+//            if (!TextUtils.isEmpty(imagePath)) {
+//                File imageFile = new File(imagePath);
+//                if (imageFile.exists()) {
+//                    imgCover.setImageURI(Uri.fromFile(imageFile));
+//                } else {
+//                    // 图片文件不存在
+//                    imgCover.setImageResource(R.drawable.cover_default);
+//                }
+//            } else {
+//                // 图片路径为空
+//                imgCover.setImageResource(R.drawable.cover_default);
+//            }
+
             Uri imageUri = data.getData();
-            imgCover.setImageURI(imageUri);
+            String imagePath = getRealPathFromURI(imageUri);
 
-            // 获取图片的URL
-            String imageUrl = Utils.getRealPath(ProfileDrawerActivity.this,data);
-            // 在这里处理你需要的图片URL
-            // ...
-
+            // 将数据库中保存的图片URL更新为真实路径
             CurrentLogin c = db.getCurrentUser();
+            LocalInfo localInfo = new LocalInfo(c.getUsername(), imagePath);
+            db.saveOrUpdate(localInfo);
 
-            LocalInfo localInfo = new LocalInfo(c.getUsername(),imageUrl);
-
-            db.insertLocalInfo(localInfo);
+            // 加载图片
+            if (!TextUtils.isEmpty(imagePath)) {
+                File imageFile = new File(imagePath);
+                if (imageFile.exists()) {
+                    Uri imageContentUri = FileProvider.getUriForFile(
+                            this,
+                            getApplicationContext().getPackageName() + ".fileprovider",
+                            imageFile
+                    );
+                    imgCover.setImageURI(imageContentUri);
+                } else {
+                    // 图片文件不存在
+                    imgCover.setImageResource(R.drawable.cover_default);
+                }
+            } else {
+                // 图片路径为空
+                imgCover.setImageResource(R.drawable.cover_default);
+            }
         }
     }
 
+
+    public String getRealPathFromURI(Uri uri) {
+        String filePath = "";
+        if (getContentResolver() != null) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                int columnIndex = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                filePath = cursor.getString(columnIndex);
+                cursor.close();
+            }
+        }
+        return filePath;
+    }
 }

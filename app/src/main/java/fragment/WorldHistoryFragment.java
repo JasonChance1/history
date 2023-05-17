@@ -14,8 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.history.DetailChineseHistoryActivity;
 import com.example.history.MyCollectionsActivity;
@@ -51,6 +53,12 @@ public class WorldHistoryFragment extends Fragment {
     private ListView listView;
     private List<DynastyContent> list=new ArrayList<>();
     private ArrayAdapter continentAdapter,countryAdapter;
+
+    private TextView screen;
+    private LinearLayout screenBox;
+
+
+    private Boolean flag = false;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -80,7 +88,6 @@ public class WorldHistoryFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
             bindEvent();
-
     }
 
     private void bindEvent(){
@@ -94,16 +101,12 @@ public class WorldHistoryFragment extends Fragment {
             }
         });
 
-
-
-
         continent.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
                 updateCountryAdapter(position);
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -115,10 +118,20 @@ public class WorldHistoryFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 currentCountry = currentList.get(position);
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
 
+        screen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(flag){
+                    screenBox.setVisibility(View.VISIBLE);
+                }else{
+                    screenBox.setVisibility(View.GONE);
+                }
+                flag = !flag;
             }
         });
     }
@@ -133,7 +146,6 @@ public class WorldHistoryFragment extends Fragment {
         continentList.add("大洋洲");
         continentList.add("南极洲");
 
-
         countriesList.clear();
         countriesList.add(asia);
         countriesList.add(europe);
@@ -145,10 +157,11 @@ public class WorldHistoryFragment extends Fragment {
     }
 
     private void initView(View view){
+        screen = view.findViewById(R.id.screenBtn);
         continent = view.findViewById(R.id.continent);
         country = view.findViewById(R.id.country);
         listView = view.findViewById(R.id.listview);
-
+        screenBox = view.findViewById(R.id.screenBox);
 
         continentAdapter = new ArrayAdapter(getActivity(),androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,continentList);
         continent.setAdapter(continentAdapter);
@@ -156,13 +169,10 @@ public class WorldHistoryFragment extends Fragment {
         CustomSpinnerAdapter countryAdapter = new CustomSpinnerAdapter(countriesList.get(0));
         country.setAdapter(countryAdapter);
     }
-
     private void updateCountryAdapter(int position) {
         currentList = countriesList.get(position);
         ArrayAdapter<String> newAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, currentList);
         newAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         country.setAdapter(newAdapter);
     }
-
-
 }
