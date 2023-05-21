@@ -33,6 +33,8 @@ public class MyCollectionsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_collections);
         db = new MySqliteOpenHelper(MyCollectionsActivity.this);
+
+
         lv = findViewById(R.id.listview);
         username = db.getCurrentUser().getUsername();
         GetRecord getRecord = new GetRecord("0",username);

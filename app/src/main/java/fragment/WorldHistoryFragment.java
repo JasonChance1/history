@@ -24,6 +24,7 @@ import com.example.history.MyCollectionsActivity;
 import com.example.history.R;
 import com.example.history.bean.DynastyContent;
 import com.example.history.bean.Threads.GetDCCallable;
+import com.example.history.bean.Threads.SearchCallable;
 import com.example.history.bean.adapter.CustomSpinnerAdapter;
 import com.example.history.bean.adapter.RecyclerViewAdapter;
 
@@ -57,8 +58,10 @@ public class WorldHistoryFragment extends Fragment {
     private TextView screen;
     private LinearLayout screenBox;
 
-
+    private List<DynastyContent> screenResultList;
     private Boolean flag = false;
+
+    private DynastyListViewAdapter adapter;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -78,7 +81,12 @@ public class WorldHistoryFragment extends Fragment {
             e.printStackTrace();
         }
 
-        DynastyListViewAdapter adapter = new DynastyListViewAdapter(getContext(),list);
+        if(flag){
+            adapter = new DynastyListViewAdapter(getContext(),screenResultList);
+        }else {
+            adapter = new DynastyListViewAdapter(getContext(),list);
+        }
+
         listView.setAdapter(adapter);
 
         return view;
@@ -104,7 +112,6 @@ public class WorldHistoryFragment extends Fragment {
         continent.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
                 updateCountryAdapter(position);
             }
             @Override
@@ -117,6 +124,17 @@ public class WorldHistoryFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 currentCountry = currentList.get(position);
+                SearchCallable searchCallable = new SearchCallable(currentCountry,"1");
+                FutureTask futureTask = new FutureTask(searchCallable);
+                Thread thread = new Thread(futureTask);
+                thread.start();
+                try {
+                    screenResultList = (List<DynastyContent>) futureTask.get();
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {

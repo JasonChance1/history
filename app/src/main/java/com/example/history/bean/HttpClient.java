@@ -82,8 +82,8 @@ public class HttpClient {
         return queryContent(url,"GET",option);
     }
 
-    public static List<DynastyContent> find(String keyword) throws IOException, JSONException {
-        URL url = new URL("http://139.155.248.158:18080/history/SearchServlet?keyword="+keyword);
+    public static List<DynastyContent> find(String keyword,String...option) throws IOException, JSONException {
+        URL url = new URL("http://139.155.248.158:18080/history/SearchServlet?keyword="+keyword+"&option = "+option);
         return queryContent(url,"GET");
     }
 
@@ -93,9 +93,9 @@ public class HttpClient {
         return queryContent(url,"GET");
     }
 
-    public static void SendMsg(String username,String contentId,String recordType) throws IOException {
+    public static void SendMsg(String username,String contentId,String recordType, String option) throws IOException {
         Log.d("SetRecord","接受的username"+username+",contentId:"+contentId+",recordType"+recordType);
-        URL url = new URL("http://139.155.248.158:18080/history/SetRecord?username="+username+"&contentId="+contentId+"&recordType="+recordType);
+        URL url = new URL("http://139.155.248.158:18080/history/SetRecord?username="+username+"&contentId="+contentId+"&recordType="+recordType+"&option="+option);
         Log.d("SetRecord",url.toString());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -137,7 +137,6 @@ public class HttpClient {
         conn.getInputStream();
         conn.disconnect();
     }
-
 
     //第一个参数为访问的url，第二个是请求类型，第三个是需要的参数，
     public static List<DynastyContent> queryContent(URL url, String type, String... strings) throws IOException, JSONException {

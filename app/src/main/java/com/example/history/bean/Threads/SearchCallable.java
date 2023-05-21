@@ -10,12 +10,17 @@ import java.util.concurrent.Callable;
 
 public class SearchCallable implements Callable<List<DynastyContent>> {
     private String keyword;
+    private String option="";
     public SearchCallable(String keyword){
         this.keyword = keyword;
     }
+    public SearchCallable(String keyword,String option){
+        this.keyword = keyword;
+        this.option = option;
+    }
     @Override
     public List<DynastyContent> call() throws Exception {
-        List<DynastyContent> list = HttpClient.find(keyword);
+        List<DynastyContent> list = HttpClient.find(keyword,option);
         Log.d("Search","线程中搜索的结果"+list.toString());
         return list;
     }

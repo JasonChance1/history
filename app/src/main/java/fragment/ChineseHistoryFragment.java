@@ -17,11 +17,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import com.example.history.BookActivity;
 import com.example.history.DetailChineseHistoryActivity;
 import com.example.history.R;
+import com.example.history.activity.BookDownLoadActivity;
 import com.example.history.bean.DynastyContent;
 import com.example.history.bean.MySqliteOpenHelper;
 import com.example.history.bean.Threads.GetDCCallable;
@@ -78,7 +77,7 @@ public class ChineseHistoryFragment extends Fragment {
                     e.printStackTrace();
                 }
                 DynastyContent clickData= dynastyContentList.get(position);
-                SetRecord setRecord = new SetRecord(username,clickData.getId().toString(),"1");
+                SetRecord setRecord = new SetRecord(username,clickData.getId().toString(),"1","1");//recordType取值为1代表浏览历史,option取值为1代表中国史
                 setRecord.start();
                 Log.d("Chinese","传递的内容为:+id为"+clickData.getId()+",title:"+clickData.getTitle());
                 intent.putExtra("data",clickData.getContent());
@@ -102,7 +101,7 @@ public class ChineseHistoryFragment extends Fragment {
                             e.printStackTrace();
                         }
                         DynastyContent clickData= dynastyContentList.get(position);
-                        SetRecord setRecord = new SetRecord(username,clickData.getId().toString(),"0");
+                        SetRecord setRecord = new SetRecord(username,clickData.getId().toString(),"0","1");
                         setRecord.start();
                         ToastUtil.showMsg(getContext(),"收藏成功");
                     }
@@ -116,12 +115,13 @@ public class ChineseHistoryFragment extends Fragment {
         book.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), BookActivity.class);
+                Intent intent = new Intent(getActivity(), BookDownLoadActivity.class);
                 startActivity(intent);
             }
         });
     }
 
+    //获取所有中国史内容
     @SuppressLint("LongLogTag")
     private List<DynastyContent> getDynastyContentFromDatabase() throws ExecutionException, InterruptedException {
         GetDCCallable getDCCallable=new GetDCCallable("1");
