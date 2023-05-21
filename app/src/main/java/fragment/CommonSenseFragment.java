@@ -18,6 +18,7 @@ import com.example.history.DetailChineseHistoryActivity;
 import com.example.history.R;
 import com.example.history.bean.DynastyContent;
 import com.example.history.bean.HttpClient;
+import com.example.history.bean.Threads.GetRecommendCallable;
 import com.example.history.bean.Threads.SearchCallable;
 import com.example.history.bean.adapter.RecyclerViewAdapter;
 
@@ -35,57 +36,51 @@ public class CommonSenseFragment extends Fragment {
     private Button findBtn;
     private EditText findKey;
 
+    private List<DynastyContent> resultList;
+
+    private RecyclerViewAdapter adapter;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_common_sense, container, false);
+
+        try {
+            initData();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         init(view);
 
-
-        findBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String keyword = findKey.getText().toString().trim();
-                Log.d("Search","关键词："+keyword);
-                try {
-                    List<DynastyContent> result = getSearchContent(keyword);
-                    Log.d("Search","查询结果："+result);
-                    rv.setLayoutManager(new LinearLayoutManager(getContext()));
-                    RecyclerViewAdapter adapter = new RecyclerViewAdapter(result);
-                    adapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(View view, int position) {
-                            Intent intent = new Intent(getContext(), DetailChineseHistoryActivity.class);
-                            DynastyContent dc = result.get(position);
-                            intent.putExtra("data",dc.getContent());
-                            startActivity(intent);
-                        }
-                    });
-                    rv.setAdapter(adapter);
-                } catch (ExecutionException e) {
-                    ToastUtil.showMsg(getContext(),"没有相关内容");
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    ToastUtil.showMsg(getContext(),"没有相关内容");
-                }
-
-            }
-        });
-
+        bindEvent();
         return view;
     }
 
+    private void initData() throws ExecutionException, InterruptedException {
+        resultList = new ArrayList<>();
+        GetRecommendCallable getRecommendCallable = new GetRecommendCallable();
+        FutureTask futureTask = new FutureTask(getRecommendCallable);
+        Thread thread = new Thread(futureTask);
+        thread.start();
+        resultList = (List<DynastyContent>) futureTask.get();
+        adapter = new RecyclerViewAdapter(resultList,getActivity());
+    }
 
     private void init(View v){
         findBtn=v.findViewById(R.id.find_btn);
         rv=v.findViewById(R.id.recyclerView);
         findKey=v.findViewById(R.id.find_input);
+
+        rv.setLayoutManager(new LinearLayoutManager(getContext()));
+        rv.setAdapter(adapter);
     }
 
     private List<DynastyContent> getSearchContent(String keyword) throws ExecutionException, InterruptedException {
         SearchCallable searchCallable = new SearchCallable(keyword);
-        List<DynastyContent> result = new ArrayList<>();
+        resultList = new ArrayList<>();
         FutureTask<List<DynastyContent>> futureTask=new FutureTask<>(searchCallable);
         Log.d("Search","创建futureTask");
         Thread thread=new Thread(futureTask);
@@ -95,12 +90,63 @@ public class CommonSenseFragment extends Fragment {
             while (!futureTask.isDone()) {
                 Thread.sleep(100); // 等待100毫秒
             }
-            result = futureTask.get();
-            Log.d("Search","执行结果："+ result);
-            return result;
+            resultList = futureTask.get();
+            Log.d("Search","执行结果："+ resultList);
+            return resultList;
         } catch (InterruptedException | ExecutionException e) {
             Log.d("Search", "Error retrieving search results", e);
             return Collections.emptyList(); // 或者以其他方式处理错误
         }
+    }
+
+    private void bindEvent(){
+//        findBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String keyword = findKey.getText().toString().trim();
+//                Log.d("Search","关键词："+keyword);
+//                try {
+//                    resultList = getSearchContent(keyword);
+//                    Log.d("Search","查询结果："+resultList);
+//
+//                } catch (ExecutionException e) {
+//                    ToastUtil.showMsg(getContext(),"没有相关内容");
+//                    e.printStackTrace();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                    ToastUtil.showMsg(getContext(),"没有相关内容");
+//                }
+//            }
+//        });
+
+        findBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String keyword = findKey.getText().toString().trim();
+                Log.d("Search", "关键词：" + keyword);
+                try {
+                    resultList = getSearchContent(keyword);
+                    Log.d("Search", "查询结果：" + resultList);
+                    adapter.setData(resultList); // Update the data in the adapter
+                    adapter.notifyDataSetChanged(); // Notify the adapter of the data change
+                } catch (ExecutionException e) {
+                    ToastUtil.showMsg(getContext(), "没有相关内容");
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    ToastUtil.showMsg(getContext(), "没有相关内容");
+                }
+            }
+        });
+
+        adapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                Intent intent = new Intent(getContext(), DetailChineseHistoryActivity.class);
+                DynastyContent dc = resultList.get(position);
+                intent.putExtra("data",dc.getContent());
+                startActivity(intent);
+            }
+        });
     }
 }

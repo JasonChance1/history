@@ -80,7 +80,7 @@ public class ChineseHistoryFragment extends Fragment {
                 SetRecord setRecord = new SetRecord(username,clickData.getId().toString(),"1","1");//recordType取值为1代表浏览历史,option取值为1代表中国史
                 setRecord.start();
                 Log.d("Chinese","传递的内容为:+id为"+clickData.getId()+",title:"+clickData.getTitle());
-                intent.putExtra("data",clickData.getContent());
+                intent.putExtra("data",clickData.getBrief());
                 startActivity(intent);
             }
         });

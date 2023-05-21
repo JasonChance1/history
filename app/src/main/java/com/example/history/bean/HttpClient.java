@@ -83,7 +83,8 @@ public class HttpClient {
     }
 
     public static List<DynastyContent> find(String keyword,String...option) throws IOException, JSONException {
-        URL url = new URL("http://139.155.248.158:18080/history/SearchServlet?keyword="+keyword+"&option = "+option);
+
+        URL url = new URL("http://139.155.248.158:18080/history/SearchServlet?keyword="+keyword+"&option = "+option[0]);
         return queryContent(url,"GET");
     }
 
@@ -108,6 +109,11 @@ public class HttpClient {
     public static List<DynastyContent> getRecord(String recordType,String username) throws IOException, JSONException {
         URL url = new URL("http://139.155.248.158:18080/history/GetRecord?recordType="+recordType+"&username="+username);
         return queryContent(url,"GET");
+    }
+
+    public static List<DynastyContent> getRecommend() throws JSONException, IOException {
+        URL url = new URL("http://139.155.248.158:18080/history/RecommendServlet?");
+        return  queryContent(url,"GET");
     }
 
     public static void clearHistory(String isClear) throws IOException {

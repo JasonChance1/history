@@ -57,9 +57,9 @@ public class DynastyListViewAdapter extends BaseAdapter {
             holder=(ViewHolder) view.getTag();
         }
         DynastyContent dc=mDynastyList.get(i);
-        holder.brief.setText(dc.getBrief());
+        holder.brief.setText(dc.getContent());
 
-        Glide.with(mcontext).load("139.155.248.158:18080/history"+dc.getImg().substring(1)).into(holder.imageView);
+        Glide.with(mcontext).load("http://139.155.248.158:18080/history"+dc.getImg().substring(1)).into(holder.imageView);
         Log.e("TAG","----"+dc.getImg().substring(1));
         holder.title.setText(dc.getTitle());
         return view;
