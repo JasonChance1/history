@@ -18,8 +18,46 @@
         android:layout_height="2000dp"
         android:layout_alignParentTop="true"
         android:layout_marginTop="229dp"
+        android:orientation="vertical"
         android:background="@drawable/rounded_background">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:padding="15dp"
+            android:layout_height="250dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:text="我的收藏"
+                android:textSize="20dp"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/collection_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:padding="15dp"
+            android:layout_height="250dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:text="我看过的"
+                android:textSize="20dp"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/history_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
     </LinearLayout>
 
 

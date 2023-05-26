@@ -1,5 +1,6 @@
 package fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +25,14 @@ import com.example.history.DetailChineseHistoryActivity;
 import com.example.history.MyCollectionsActivity;
 import com.example.history.R;
 import com.example.history.bean.DynastyContent;
+import com.example.history.bean.MySqliteOpenHelper;
 import com.example.history.bean.Threads.GetDCCallable;
 import com.example.history.bean.Threads.SearchCallable;
+import com.example.history.bean.Threads.SetRecord;
 import com.example.history.bean.adapter.CustomSpinnerAdapter;
 import com.example.history.bean.adapter.RecyclerViewAdapter;
+import com.lxj.xpopup.XPopup;
+import com.lxj.xpopup.interfaces.OnConfirmListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +41,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 import listview.DynastyListViewAdapter;
+import utils.ToastUtil;
 
 public class WorldHistoryFragment extends Fragment {
     private Spinner continent,country;
@@ -60,6 +67,8 @@ public class WorldHistoryFragment extends Fragment {
 
     private List<DynastyContent> screenResultList;
     private Boolean flag = false;
+
+    private MySqliteOpenHelper db;
 
     private DynastyListViewAdapter adapter;
     @Override
@@ -99,15 +108,48 @@ public class WorldHistoryFragment extends Fragment {
     }
 
     private void bindEvent(){
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                DynastyContent dynastyContent = list.get(position);
-                Intent intent = new Intent(getContext(), DetailChineseHistoryActivity.class);
-                intent.putExtra("data",dynastyContent.getContent());
-                startActivity(intent);
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent(getContext(), DetailChineseHistoryActivity.class);
+            List<DynastyContent> dynastyContentList= new ArrayList<>();
+            try {
+                dynastyContentList=getWorldHistoryFromDatabase();
+                Log.d("WorldHistory",dynastyContentList.toString());
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            DynastyContent clickData= dynastyContentList.get(position);
+            Log.d("WorldHistory",db.getCurrentUser().getUsername()+","+clickData.getId().toString());
+            SetRecord setRecord = new SetRecord(db.getCurrentUser().getUsername(),clickData.getId().toString(),"1","2");//recordType取值为1代表浏览历史,option取值为1代表中国史
+            setRecord.start();
+
+            intent.putExtra("data",clickData.getContent());
+            startActivity(intent);
         });
+
+        listView.setOnItemLongClickListener((parent, view, position, id) -> {
+            new XPopup.Builder(getContext()).asConfirm("", "是否加入收藏", new OnConfirmListener() {
+                @Override
+                public void onConfirm() {
+                    List<DynastyContent>  dynastyContentList= null;
+                    try {
+                        dynastyContentList = getWorldHistoryFromDatabase();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    DynastyContent clickData= dynastyContentList.get(position);
+                    SetRecord setRecord = new SetRecord(db.getCurrentUser().getUsername(),clickData.getId().toString(),"0","2");
+                    setRecord.start();
+                    ToastUtil.showMsg(getContext(),"收藏成功");
+                }
+            }).show();
+
+            return true;
+        });
+
 
         continent.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -120,6 +162,7 @@ public class WorldHistoryFragment extends Fragment {
             }
         });
 
+        //国家下拉选项
         country.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -155,6 +198,8 @@ public class WorldHistoryFragment extends Fragment {
     }
 
     private void initData(){
+        db = new MySqliteOpenHelper(getContext());
+
         continentList.clear();
         continentList.add("亚洲");
         continentList.add("欧洲");
@@ -192,5 +237,14 @@ public class WorldHistoryFragment extends Fragment {
         ArrayAdapter<String> newAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, currentList);
         newAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         country.setAdapter(newAdapter);
+    }
+
+    @SuppressLint("LongLogTag")
+    private List<DynastyContent> getWorldHistoryFromDatabase() throws ExecutionException, InterruptedException {
+        GetDCCallable getDCCallable=new GetDCCallable("2");
+        FutureTask futureTask=new FutureTask(getDCCallable);
+        new Thread(futureTask).start();
+        List<DynastyContent> list= (List<DynastyContent>) futureTask.get();
+        return list;
     }
 }

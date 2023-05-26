@@ -56,5 +56,5 @@ dependencies {
 
     // https://github.com/li-xiaojun/XPopup
     implementation 'com.github.li-xiaojun:XPopup:2.9.4'
-
+    implementation 'androidx.webkit:webkit:1.4.0'
 }

@@ -37,7 +37,7 @@ public class MyCollectionsActivity extends AppCompatActivity {
 
         lv = findViewById(R.id.listview);
         username = db.getCurrentUser().getUsername();
-        GetRecord getRecord = new GetRecord("0",username);
+        GetRecord getRecord = new GetRecord("0",username);//0为收藏记录
         FutureTask futureTask = new FutureTask(getRecord);
         Thread thread = new Thread(futureTask);
         thread.start();

@@ -34,24 +34,19 @@ public class HistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_history);
 
         db = new MySqliteOpenHelper(HistoryActivity.this);
-        Log.d("HistoryBrowse","HistoryActivity");
         String username = db.getCurrentUser().getUsername();
         listView = findViewById(R.id.listview);
         GetRecord getRecord = new GetRecord("1",username);
         FutureTask futureTask = new FutureTask(getRecord);
         Thread thread=new Thread(futureTask);
-
         thread.start();
         try {
             dc = (List<DynastyContent>) futureTask.get();
         } catch (ExecutionException e) {
             e.printStackTrace();
-            Log.d("HistoryBrowse","异常1："+dc);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            Log.d("HistoryBrowse","异常2："+dc);
         }
-        Log.d("HistoryBrowse","HistoryActivity接收数据："+dc);
         DynastyListViewAdapter adapter = new DynastyListViewAdapter(HistoryActivity.this,dc);
         listView.setAdapter(adapter);
 
@@ -64,7 +59,6 @@ public class HistoryActivity extends AppCompatActivity {
                 ToastUtil.showMsg(HistoryActivity.this,"清除历史");
             }
         });
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
