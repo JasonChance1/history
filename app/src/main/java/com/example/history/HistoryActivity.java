@@ -36,12 +36,18 @@ public class HistoryActivity extends AppCompatActivity {
         db = new MySqliteOpenHelper(HistoryActivity.this);
         String username = db.getCurrentUser().getUsername();
         listView = findViewById(R.id.listview);
-        GetRecord getRecord = new GetRecord("1",username);
+        GetRecord getRecord = new GetRecord("1",username,"1");
         FutureTask futureTask = new FutureTask(getRecord);
         Thread thread=new Thread(futureTask);
         thread.start();
+
+        GetRecord getRecord1 = new GetRecord("1",username,"2");
+        FutureTask futureTask1 = new FutureTask(getRecord1);
+        Thread thread1=new Thread(futureTask1);
+        thread1.start();
         try {
             dc = (List<DynastyContent>) futureTask.get();
+            dc.addAll((List<DynastyContent>)futureTask1.get());
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

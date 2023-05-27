@@ -106,8 +106,8 @@ public class HttpClient {
         conn.disconnect(); // 断开连接
     }
 
-    public static List<DynastyContent> getRecord(String recordType,String username) throws IOException, JSONException {
-        URL url = new URL("http://139.155.248.158:18080/history/GetRecord?recordType="+recordType+"&username="+username);
+    public static List<DynastyContent> getRecord(String recordType,String username,String opt) throws IOException, JSONException {
+        URL url = new URL("http://139.155.248.158:18080/history/GetRecord?recordType="+recordType+"&username="+username+"&opt="+opt);
         return queryContent(url,"GET");
     }
 

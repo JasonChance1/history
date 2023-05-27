@@ -65,6 +65,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import utils.HttpUtil;
+import utils.ImageUploader;
 import utils.ToastUtil;
 import utils.Utils;
 
@@ -146,20 +147,30 @@ public class ProfileActivity extends AppCompatActivity {
             int lastIndex = imgPath.lastIndexOf("/");
             String fileName1 = imgPath.substring(lastIndex + 1);//获取图片名.后缀
             CurrentLogin c = db.getCurrentUser();
-            db.setCurrentUser(c.getUsername(),c.getPassword(),c.getNickname(),fileName1,c.getUid());
             new Thread(){
                 @Override
                 public void run() {
-                    try {
-                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
-//                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
-//                        Log.d("TAG","imgpaht:"+imgPath);
-//                        uploadImage("http://139.155.248.158:18080/history/TestUpload",imgPath);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    super.run();
+                    ImageUploader imageUploader = new ImageUploader(ProfileActivity.this);
+                    imageUploader.uploadImage(imgPath, c.getUid());
                 }
             }.start();
+
+
+//            db.setCurrentUser(c.getUsername(),c.getPassword(),c.getNickname(),fileName1,c.getUid());
+//            new Thread(){
+//                @Override
+//                public void run() {
+//                    try {
+////                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
+////                        uploadImage("http://139.155.248.158:18080/history/UploadServlet",imgPath);
+////                        Log.d("TAG","imgpaht:"+imgPath);
+////                        uploadImage("http://139.155.248.158:18080/history/TestUpload",imgPath);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }.start();
         }
 
     }

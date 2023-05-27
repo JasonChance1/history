@@ -37,12 +37,17 @@ public class MyCollectionsActivity extends AppCompatActivity {
 
         lv = findViewById(R.id.listview);
         username = db.getCurrentUser().getUsername();
-        GetRecord getRecord = new GetRecord("0",username);//0为收藏记录
+        GetRecord getRecord = new GetRecord("0",username,"1");//0为收藏记录,中国史表
+        GetRecord getRecord1 = new GetRecord("0",username,"2");//0为收藏记录，世界史表
         FutureTask futureTask = new FutureTask(getRecord);
+        FutureTask futureTask1 = new FutureTask(getRecord1);
         Thread thread = new Thread(futureTask);
+        Thread thread1 = new Thread(futureTask1);
         thread.start();
+        thread1.start();
         try {
             list = (List<DynastyContent>) futureTask.get();
+            list.addAll((List<DynastyContent>)futureTask1.get());
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

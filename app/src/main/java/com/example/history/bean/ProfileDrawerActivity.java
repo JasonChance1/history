@@ -18,6 +18,9 @@ import com.example.history.bean.Threads.GetRecord;
 import com.example.history.bean.adapter.RecyclerViewAdapter;
 import com.example.history.bean.model.CurrentLogin;
 import com.example.history.bean.model.LocalInfo;
+import com.lxj.xpopup.XPopup;
+import com.lxj.xpopup.interfaces.OnSelectListener;
+import com.lxj.xpopup.util.SmartGlideImageLoader;
 
 import java.io.File;
 import java.util.List;
@@ -55,19 +58,28 @@ public class ProfileDrawerActivity extends AppCompatActivity {
     private void initData() throws ExecutionException, InterruptedException {
         db = new MySqliteOpenHelper(ProfileDrawerActivity.this);
         CurrentLogin user = db.getCurrentUser();
-        GetRecord getRecord = new GetRecord("1",user.getUsername());
+        GetRecord getHistory = new GetRecord("1",user.getUsername(),"1");
+        FutureTask gethistoryFutureTask = new FutureTask(getHistory);
+        Thread historyThread=new Thread(gethistoryFutureTask);
+        historyThread.start();
+        GetRecord getHistory1 = new GetRecord("1",user.getUsername(),"2");
+        FutureTask gethistoryFutureTask1 = new FutureTask(getHistory1);
+        Thread historyThread1=new Thread(gethistoryFutureTask1);
+        historyThread1.start();
+        historyList = (List<DynastyContent>) gethistoryFutureTask.get();
+        historyList.addAll ((List<DynastyContent>) gethistoryFutureTask1.get());
+
+        GetRecord getRecord = new GetRecord("0",user.getUsername(),"1");
         FutureTask futureTask = new FutureTask(getRecord);
-        Thread thread=new Thread(futureTask);
+        Thread thread = new Thread(futureTask);
         thread.start();
-        historyList = (List<DynastyContent>) futureTask.get();
 
-
-
-        GetRecord getRecord1 = new GetRecord("0",user.getUsername());
+        GetRecord getRecord1 = new GetRecord("0",user.getUsername(),"2");
         FutureTask futureTask1 = new FutureTask(getRecord1);
         Thread thread1 = new Thread(futureTask1);
         thread1.start();
-        collectionList = (List<DynastyContent>) futureTask1.get();
+        collectionList = (List<DynastyContent>) futureTask.get();
+        collectionList.addAll((List<DynastyContent>)futureTask1.get());
     }
     private void initView(){
         imgCover = findViewById(R.id.img_cover);
@@ -80,7 +92,20 @@ public class ProfileDrawerActivity extends AppCompatActivity {
 
         }
 
-        imgCover.setOnClickListener(v -> openGallery());
+        imgCover.setOnClickListener(v -> {
+            new XPopup.Builder(ProfileDrawerActivity.this).asBottomList("", new String[]{"修改封面", "查看图片"},
+                            (position, text) -> {
+                                if(position==0){
+                                    openGallery();
+                                }
+                                else if(position==1){
+                                    new XPopup.Builder(ProfileDrawerActivity.this)
+                                            .asImageViewer(imgCover, "http://139.155.248.158:18080/history/uploads/1685094517837_%E7%A7%A6.png", new SmartGlideImageLoader())
+                                            .show();
+                                }
+                            })
+                    .show();
+        });
         collectionRv = findViewById(R.id.collection_recyclerview);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         collectionRv.setLayoutManager(layoutManager);
