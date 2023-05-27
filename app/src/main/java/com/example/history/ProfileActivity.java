@@ -35,8 +35,11 @@ import com.example.history.bean.Account;
 import com.example.history.bean.MySqliteOpenHelper;
 import com.example.history.bean.Threads.ChangeNicknameThread;
 import com.example.history.bean.Threads.ChangePasswordThread;
+import com.example.history.bean.Threads.NetWorkThread;
 import com.example.history.bean.Threads.UploadTask;
 import com.example.history.bean.model.CurrentLogin;
+
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -54,6 +57,10 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -66,6 +73,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import utils.HttpUtil;
 import utils.ImageUploader;
+import utils.JsonToObject;
 import utils.ToastUtil;
 import utils.Utils;
 
@@ -124,11 +132,8 @@ public class ProfileActivity extends AppCompatActivity {
                         AlertDialog dialog1 = builder.create();
                         dialog1.dismiss();
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                }).setNegativeButton("取消", (dialog, which) -> {
 
-                    }
                 }).show();
             }
         });
@@ -156,8 +161,36 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }.start();
 
-
-//            db.setCurrentUser(c.getUsername(),c.getPassword(),c.getNickname(),fileName1,c.getUid());
+            //修改数据库的图片
+            NetWorkThread netWorkThread=new NetWorkThread(c.getUsername(),c.getPassword());
+            FutureTask futureTask=new FutureTask(netWorkThread);
+            Thread thread=new Thread(futureTask);
+            thread.start();
+            String content = null;
+            try {
+                content = (String) futureTask.get();
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            Map<String,String> map;
+            try {
+               map = JsonToObject.parseMap(content);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+            String datas=map.get("data");
+            Map<String,String> dataMap;
+            try {
+                dataMap=JsonToObject.parseMap(JsonToObject.sub(datas));
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+            Log.e("ProfileActivity","content:"+content+",map"+map+",avatar"+dataMap.get("avatar"));
+            String newAvatar = dataMap.get("avatar");
+            c.setAvatar(newAvatar);
+            db.updateCurrentUser(c);
 //            new Thread(){
 //                @Override
 //                public void run() {
@@ -176,74 +209,74 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
 
-    private void uploadImage(String url, String filePath) throws IOException {
-        Log.e("------","上传图片filePath"+filePath);
-        // 创建URL对象
-        URL urlObj = new URL(url);
-        // 打开连接
-        HttpURLConnection conn = (HttpURLConnection)urlObj.openConnection();
-        // 设置请求方法
-        conn.setRequestMethod("POST");
-        // 允许输入输出流
-        conn.setDoInput(true);
-        conn.setDoOutput(true);
-        Log.e("------","允许输入流");
-        String boundary = "****";
-        // 设置请求头
-        conn.setRequestProperty("Connection", "Keep-Alive");
-        conn.setRequestProperty("Charset", "UTF-8");
-        conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-        Log.e("------","设置请求头");
-        // 获取输出流
-        OutputStream out = conn.getOutputStream();
-        Log.e("------","获取输出流");
-        // 缓存区大小
-        byte[] buffer = new byte[4096];
-        int len = 0;
-        // 读取文件
-        FileInputStream fis = new FileInputStream(new File(filePath));
-        Log.e("------","读取文件fis");
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("--" + boundary + "\r\n");
-        sb.append("Content-Disposition: form-data; name=\"file\"; fileName=\"" + filePath + "\"\r\n");
-        sb.append("Content-Type: application/octet-stream\r\n\r\n");
-
-        sb.append("--" + boundary + "\r\n");
-        sb.append("Content-Disposition: form-data; name=\"id\"\r\n\r\n");
-        String id = db.getCurrentUser().getUid();
-        CurrentLogin c = db.getCurrentUser();
-        Log.e("ProfileActivity:","username"+c.getUsername()+",nickname"+c.getNickname()+",id:"+c.getUid());
-        sb.append(1 + "\r\n");
-
-
-        out.write(sb.toString().getBytes());
-        Log.e("------","写入请求头,id:"+db.getCurrentUser().getUid()+","+sb);
-        // 写入文件数据
-        while ((len = fis.read(buffer)) != -1) {
-            out.write(buffer, 0, len);
-        }
-        Log.e("------","上传图片"+out);
-        // 写入请求尾
-        String endStr = "\r\n--" + boundary + "--\r\n";
-        out.write(endStr.getBytes());
-        Log.e("------","写入请求尾"+endStr);
-        // 关闭流
-        fis.close();
-        out.flush();
-        out.close();
-        // 获取服务器返回结果
-        InputStream in = conn.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        String result = "";
-        String line = "";
-        while ((line = reader.readLine()) != null) {
-            result += line;
-        }
-        Log.e("------","返回结果"+result);
-        // 关闭流
-        in.close();
-    }
+//    private void uploadImage(String url, String filePath) throws IOException {
+//        Log.e("------","上传图片filePath"+filePath);
+//        // 创建URL对象
+//        URL urlObj = new URL(url);
+//        // 打开连接
+//        HttpURLConnection conn = (HttpURLConnection)urlObj.openConnection();
+//        // 设置请求方法
+//        conn.setRequestMethod("POST");
+//        // 允许输入输出流
+//        conn.setDoInput(true);
+//        conn.setDoOutput(true);
+//        Log.e("------","允许输入流");
+//        String boundary = "****";
+//        // 设置请求头
+//        conn.setRequestProperty("Connection", "Keep-Alive");
+//        conn.setRequestProperty("Charset", "UTF-8");
+//        conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+//        Log.e("------","设置请求头");
+//        // 获取输出流
+//        OutputStream out = conn.getOutputStream();
+//        Log.e("------","获取输出流");
+//        // 缓存区大小
+//        byte[] buffer = new byte[4096];
+//        int len = 0;
+//        // 读取文件
+//        FileInputStream fis = new FileInputStream(new File(filePath));
+//        Log.e("------","读取文件fis");
+//
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("--" + boundary + "\r\n");
+//        sb.append("Content-Disposition: form-data; name=\"file\"; fileName=\"" + filePath + "\"\r\n");
+//        sb.append("Content-Type: application/octet-stream\r\n\r\n");
+//
+//        sb.append("--" + boundary + "\r\n");
+//        sb.append("Content-Disposition: form-data; name=\"id\"\r\n\r\n");
+//        String id = db.getCurrentUser().getUid();
+//        CurrentLogin c = db.getCurrentUser();
+//        Log.e("ProfileActivity:","username"+c.getUsername()+",nickname"+c.getNickname()+",id:"+c.getUid());
+//        sb.append(1 + "\r\n");
+//
+//
+//        out.write(sb.toString().getBytes());
+//        Log.e("------","写入请求头,id:"+db.getCurrentUser().getUid()+","+sb);
+//        // 写入文件数据
+//        while ((len = fis.read(buffer)) != -1) {
+//            out.write(buffer, 0, len);
+//        }
+//        Log.e("------","上传图片"+out);
+//        // 写入请求尾
+//        String endStr = "\r\n--" + boundary + "--\r\n";
+//        out.write(endStr.getBytes());
+//        Log.e("------","写入请求尾"+endStr);
+//        // 关闭流
+//        fis.close();
+//        out.flush();
+//        out.close();
+//        // 获取服务器返回结果
+//        InputStream in = conn.getInputStream();
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+//        String result = "";
+//        String line = "";
+//        while ((line = reader.readLine()) != null) {
+//            result += line;
+//        }
+//        Log.e("------","返回结果"+result);
+//        // 关闭流
+//        in.close();
+//    }
 
     public void verifyStoragePermissions(Activity activity) {
         // 检查是否已经授权
@@ -320,6 +353,8 @@ private void initData(){
                             new ChangePasswordThread(db.getCurrentUser().getUsername(),newpassword).start();
                             CurrentLogin c = db.getCurrentUser();
                             ToastUtil.showMsg(ProfileActivity.this,"修改成功");
+                            c.setPassword(newpassword);
+                            db.updateCurrentUser(c);
 //                            db.setCurrentUser(c.getUsername(),newpassword,c.getNickname(),c.getAvatar(),c.getUid());
                         }
 
@@ -347,7 +382,10 @@ private void initData(){
                         nickname_profile.setText(newNickname);
                         ChangeNicknameThread thread = new ChangeNicknameThread(db.getCurrentUser().getUsername(),newNickname);
                         thread.start();
-                        db.setCurrentUser(db.getCurrentUser().getUsername(),db.getCurrentUser().getPassword(),newNickname,db.getCurrentUser().getAvatar(),db.getCurrentUser().getUid());
+                        CurrentLogin c = db.getCurrentUser();
+                        c.setNickname(newNickname);
+                        db.updateCurrentUser(c);
+//                        db.setCurrentUser(db.getCurrentUser().getUsername(),db.getCurrentUser().getPassword(),newNickname,db.getCurrentUser().getAvatar(),db.getCurrentUser().getUid());
                         ToastUtil.showMsg(ProfileActivity.this,"修改成功");
                     }
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {

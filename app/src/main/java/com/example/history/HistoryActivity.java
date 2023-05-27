@@ -28,6 +28,7 @@ public class HistoryActivity extends AppCompatActivity {
     private Button clear;
     private List<DynastyContent> dc = new ArrayList<>();
     private MySqliteOpenHelper db;
+    private DynastyListViewAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,26 +54,22 @@ public class HistoryActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        DynastyListViewAdapter adapter = new DynastyListViewAdapter(HistoryActivity.this,dc);
+        adapter = new DynastyListViewAdapter(HistoryActivity.this,dc);
         listView.setAdapter(adapter);
 
         clear = findViewById(R.id.clear_history);
-        clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ClearHistory clearHistory = new ClearHistory("1");
-                clearHistory.start();
-                ToastUtil.showMsg(HistoryActivity.this,"清除历史");
-            }
+        clear.setOnClickListener(v -> {
+            ClearHistory clearHistory = new ClearHistory("1",username);
+            clearHistory.start();
+            ToastUtil.showMsg(HistoryActivity.this,"清除历史");
+
         });
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                DynastyContent dynastyContent = dc.get(position);
-                Intent intent = new Intent(HistoryActivity.this,DetailChineseHistoryActivity.class);
-                intent.putExtra("data",dynastyContent.getContent());
-                startActivity(intent);
-            }
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            DynastyContent dynastyContent = dc.get(position);
+            Intent intent = new Intent(HistoryActivity.this,DetailChineseHistoryActivity.class);
+            intent.putExtra("data",dynastyContent.getContent());
+            startActivity(intent);
         });
     }
+
 }

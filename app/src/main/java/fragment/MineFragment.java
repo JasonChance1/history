@@ -87,12 +87,9 @@ public class MineFragment extends Fragment {
         });
 
         //进入设置界面
-        setting.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(getActivity(), SettingActivity.class);
-                startActivity(intent);
-            }
+        setting.setOnClickListener(v -> {
+            Intent intent=new Intent(getActivity(), SettingActivity.class);
+            startActivity(intent);
         });
 
         //进入收藏界面
@@ -105,15 +102,10 @@ public class MineFragment extends Fragment {
         });
 
         //浏览记录
-        history.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), HistoryActivity.class);
-                startActivity(intent);
-            }
+        history.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), HistoryActivity.class);
+            startActivity(intent);
         });
-
-
 
     }
 
@@ -121,6 +113,8 @@ public class MineFragment extends Fragment {
     public void onResume() {
         super.onResume();
         nickname.setText(db.getCurrentUser().getNickname());
+        Glide.with(getActivity()).load("http://139.155.248.158:18080/history/"+db.getCurrentUser().getAvatar()).into(imageView);
+
     }
 
     private void initView(View view){
@@ -133,7 +127,5 @@ public class MineFragment extends Fragment {
         imageView.setImageResource(R.drawable.default_avatar);
     }
 
-//    public void onFragmentResume() {
-//        Glide.with(getActivity()).load("http://139.155.248.158:18080/file/uploads/"+db.getCurrentUser().getAvatar()).into(imageView);
-//    }
+
 }

@@ -71,6 +71,17 @@ public class MySqliteOpenHelper extends SQLiteOpenHelper {
 
     }
 
+    public void updateCurrentUser(CurrentLogin currentLogin){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("username",currentLogin.getUsername());
+        cv.put("password",currentLogin.getPassword());
+        cv.put("nickname",currentLogin.getNickname());
+        cv.put("avatar",currentLogin.getAvatar());
+        cv.put("id",currentLogin.getUid());
+        db.update(TABLE_NAME_CURRENT_LOGIN,cv,"username=?",new String[]{currentLogin.getUsername()});
+    }
+
     public CurrentLogin getCurrentUser(){
         SQLiteDatabase db = getWritableDatabase();
         CurrentLogin currentLogin = new CurrentLogin();

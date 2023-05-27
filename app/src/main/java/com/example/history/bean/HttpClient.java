@@ -116,9 +116,8 @@ public class HttpClient {
         return  queryContent(url,"GET");
     }
 
-    public static void clearHistory(String isClear) throws IOException {
-        URL url = new URL("http://139.155.248.158:18080/history/ClearHistoryServlet?clear="+isClear);
-        Log.d("ClearHistory","isClear:"+isClear);
+    public static void clearHistory(String isClear,String username) throws IOException {
+        URL url = new URL("http://139.155.248.158:18080/history/ClearHistoryServlet?clear="+isClear+"&username="+username);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 
